@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>University Checker | Create Project</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href= "{% static 'css/university.css' %}"/>
+    <script src="https://cdn.jsdelivr.net/gh/alpine-collective/alpine-magic-helpers@0.5.x/dist/component.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.7.3/dist/alpine.min.js" defer></script>
+    <!-- Select2 CSS -->
+    {% comment %} <script src="https://cdn.tailwindcss.com"></script> {% endcomment %}
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+
+  </head>
+  <body>
+    <div x-data="setup()" x-init="$refs.loading.classList.add('hidden'); setColors(color);" :class="{ 'dark': isDark}">
+      <div class="flex h-screen antialiased text-gray-900 bg-gray-100 dark:bg-dark dark:text-light">
+        <!-- Loading screen -->
+        <div
+          x-ref="loading"
+          class="fixed inset-0 z-50 flex items-center justify-center text-2xl font-semibold text-white bg-primary-darker"
+        >
+          Loading.....
+        </div>
+
+            <!-- Sidebar -->
+            {% include "inc/sidebar.html"%}
+        <!-- end Sidebar -->
+
+        <div class="flex-1 h-full overflow-x-hidden overflow-y-auto">
+          <!-- Navbar -->
+          {% include "inc/header.html"%}
+
+          <!-- Main content -->
+          <main>
+            
+            <!-- Adding toast-->
+            {% include "inc/toast.html" %}
+            <!-- End toast  -->
+            <!-- Content header -->
+            <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
+              <h1 class="text-2xl font-semibold">Create Project</h1>
+            </div>
+           <!-- spinner for awaiting data -->
+            {% comment %} <button id="create-button" class="px-6 py-3 font-medium loadbutton text-center text-white transition-colors duration-200 rounded-md bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-darker" onclick="showLoader()">
+              click spinner
+            </button> {% endcomment %}
+            <div class="flex items-center justify-center hidden" id="loader">
+              <button disabled type="button" class="text-white bg-primary hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium 
+                                              rounded-lg text-sm px-5 py-2.5 text-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 
+                                              dark:focus:ring-blue-800 inline-flex items-center">
+                <svg aria-hidden="true" role="status" class="inline w-4 h-4 mr-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+                </svg>
+                Loading...
+              </button>
+            </div>
+            <!-- end spinner for awaiting data -->
+
+            <!-- select -->
+            <div class="mt-2">
+              <div class="flex items-center justify-center lg:py-6 grid grid-cols-1 p-4 lg:gap-12 lg:space-y-2 lg:grid-cols-1">
+                <label for="select2SinglePlaceholder" style="justify-items: center;">Select University</label>
+              </div>
+              {% if university_list %}
+                <form method="post" action="{% url 'university_checker:new_project' %}">
+                  {% csrf_token %}
+                  <div class="flex items-center justify-between lg:py-6 grid grid-cols-1 p-4 lg:gap-12 lg:space-y-2 lg:grid-cols-1">
+                    <select name="university" class="block w-full px-4 py-2 text-sm leading-5 transition duration-150 ease-in-out border rounded-md focus:outline-none focus:shadow-outline-primary dark:bg-dark dark:text-light focus:border-blue-300">
+                      <option value="">Select</option>
+                      {% for university in university_list %}
+                        <option value="{{ university.name }}">{{ university.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="flex items-center justify-center h-full">
+                    <button type="submit" id="create-button" class="px-6 py-3 font-medium loadbutton text-center text-white transition-colors duration-200 rounded-md bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-darker">
+                      Create
+                    </button>
+                  </div>
+                </form>
+              {%else%}
+                <div class="flex items-center justify-between lg:py-6 grid grid-cols-1 p-4 lg:gap-12 lg:space-y-2 lg:grid-cols-1">
+              
+                  <p class="text-sm font-medium text-center text-gray-500 dark:text-gray-400">
+                    No University found in the database.
+                  </p>
+                </div>
+                {% endif %}
+                
+            </div>
+          </main>
+        </div>
+      </div>
+          
+      {% include "inc/footer.html"%}
+    </div>
+    <script>  
+      const setup = () => {
+        const getTheme = () => {
+          if (window.localStorage.getItem('dark')) {
+            return JSON.parse(window.localStorage.getItem('dark'))
+          }
+
+          return !!window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        }
+
+        const setTheme = (value) => {
+          window.localStorage.setItem('dark', value)
+        }
+
+        const getColor = () => {
+          if (window.localStorage.getItem('color')) {
+            return window.localStorage.getItem('color')
+          }
+          return 'blue'
+        }
+
+        const setColors = (color) => {
+          const root = document.documentElement
+          root.style.setProperty('--color-primary', `var(--color-${color})`)
+          root.style.setProperty('--color-primary-50', `var(--color-${color}-50)`)
+          root.style.setProperty('--color-primary-100', `var(--color-${color}-100)`)
+          root.style.setProperty('--color-primary-light', `var(--color-${color}-light)`)
+          root.style.setProperty('--color-primary-lighter', `var(--color-${color}-lighter)`)
+          root.style.setProperty('--color-primary-dark', `var(--color-${color}-dark)`)
+          root.style.setProperty('--color-primary-darker', `var(--color-${color}-darker)`)
+          this.selectedColor = color
+          window.localStorage.setItem('color', color)
+          //
+        }
+
+
+        return {
+          loading: true,
+          isDark: getTheme(),
+          toggleTheme() {
+            this.isDark = !this.isDark
+            setTheme(this.isDark)
+          },
+          setLightTheme() {
+            this.isDark = false
+            setTheme(this.isDark)
+          },
+          setDarkTheme() {
+            this.isDark = true
+            setTheme(this.isDark)
+          },
+          color: getColor(),
+          selectedColor: 'blue',
+          setColors,
+          toggleSidbarMenu() {
+            this.isSidebarOpen = !this.isSidebarOpen
+          },
+          isMobileSubMenuOpen: false,
+          openMobileSubMenu() {
+            this.isMobileSubMenuOpen = true
+            this.$nextTick(() => {
+              this.$refs.mobileSubMenu.focus()
+            })
+          },
+          isMobileMainMenuOpen: false,
+          openMobileMainMenu() {
+            this.isMobileMainMenuOpen = true
+            this.$nextTick(() => {
+              this.$refs.mobileMainMenu.focus()
+            })
+          }
+        }
+      }
+      // toast and spinner code
+       //script for toast 
+       function showToast() {
+       // console.log('showToast function is called'); 
+        var toast = document.getElementById('static-example');
+
+        setTimeout(function () {
+          // Hide the toast by setting show to false
+          toast.__x.$data.show = false;
+          
+          if (toast.classList.contains('success')) {
+            // Redirect to your dashboard after the toast has faded
+            setTimeout(function () {
+              window.location.href = "{% url 'university_checker:overview' %}";
+            }, 1000);
+          }
+        }, 2000);
+      }
+
+      // Show the toast when the page is loaded
+      showToast();
+
+      // adding spinner for awaiting
+       function showLoader() {
+        var loader = document.getElementById('loader');
+        loader.classList.remove("hidden");
+        console.log(loader);
+      }
+      
+      function hideLoader() {
+          var loader = document.getElementById('loader');
+          loader.classList.add("hidden");
+          console.log(loader);
+      }
+      
+      // Attach the click event listener to the "Create" button
+      document.getElementById('create-button').addEventListener('click', function(event) {
+          showLoader();
+      });
+      
+    </script>
+
+  </body>
+  
+</html>

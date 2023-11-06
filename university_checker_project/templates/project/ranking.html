@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>University Checker | Project Ranking</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href= "{% static 'css/university.css' %}"/>
+    <script src="https://cdn.jsdelivr.net/gh/alpine-collective/alpine-magic-helpers@0.5.x/dist/component.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.7.3/dist/alpine.min.js" defer></script>
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css">  
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+  </head>
+  <body>
+    <div x-data="setup()" x-init="$refs.loading.classList.add('hidden'); setColors(color);" :class="{ 'dark': isDark}">
+      <div class="flex h-screen antialiased text-gray-900 bg-gray-100 dark:bg-dark dark:text-light">
+        <!-- Loading screen -->
+        <div
+          x-ref="loading"
+          class="fixed inset-0 z-50 flex items-center justify-center text-2xl font-semibold text-white bg-primary-darker"
+        >
+          Loading.....
+        </div>
+
+            <!-- Sidebar -->
+            {% include "inc/sidebar.html"%}
+        <!-- end Sidebar -->
+
+        <div class="flex-1 h-full overflow-x-hidden overflow-y-auto">
+            <!-- Header -->
+            {% include "inc/header.html"%}
+
+          <!-- Main content -->
+          <main >
+            <!-- Content header -->
+            <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
+              <h1 class="text-2xl font-semibold">Ranking</h1>
+            </div>
+
+            <!-- select -->
+            <div class="mt-2">
+
+              <!-- Charts -->
+              <div class="grid grid-cols-1 p-4 space-y-8 lg:gap-8 lg:space-y-0">
+                <!-- Line chart card -->
+                <div class="col-span-2 bg-white rounded-md dark:bg-darker" x-data="{ isOn: false }">
+                  <!-- Card header -->
+                  <div class="flex items-center justify-between p-4 border-b dark:border-primary">
+                    <h4 class="text-lg font-semibold text-gray-500 dark:text-light">University Ranges</h4>
+                   
+                  </div>
+                  <!-- data table -->
+                  <div class="relative p-4 h-full h-72">
+                    <table id="example" class="display nowrap" style="width:100%">
+                      <thead>
+                        <tr>
+                          <th class="">Rank</th>
+                          <th>University</th>
+                          <th>Positive</th>
+                          <th>Negative</th>
+                        </tr>
+                      </thead>
+                      <tbody> 
+                        <tr>   
+                          <td class="">
+                              <div class="">1</div>
+                          </td> 
+                          <td class="" >
+                              <div class="">UP</div>
+                          </td>
+                          <td class="">  
+                              <div class="">67%</div> 
+                          </td>
+                          <td class="">  
+                              <div class="">34%</div> 
+                          </td>
+                        </tr>  
+                        <tr>   
+                          <td class="">
+                              <div class="">2</div>
+                          </td> 
+                          <td class="" >
+                              <div class="">TUT</div>
+                          </td>
+                          <td class="">  
+                              <div class="">65%</div> 
+                          </td>
+                          <td class="">  
+                              <div class="">40%</div> 
+                          </td>
+                        </tr>  
+                        <tr>   
+                          <td class="">
+                              <div class="">3</div>
+                          </td> 
+                          <td class="" >
+                              <div class="">UNISA</div>
+                          </td>
+                          <td class="">  
+                              <div class="">60%</div> 
+                          </td>
+                          <td class="">  
+                              <div class="">40%</div> 
+                          </td>
+                        </tr>   
+                        <tr>   
+                          <td class="">
+                              <div class="">4</div>
+                          </td> 
+                          <td class="" >
+                              <div class="">UJ</div>
+                          </td>
+                          <td class="">  
+                              <div class="">59%</div> 
+                          </td>
+                          <td class="">  
+                              <div class="">45%</div> 
+                          </td>
+                        </tr>   
+                        <tr>   
+                          <td class="">
+                              <div class="">5</div>
+                          </td> 
+                          <td class="" >
+                              <div class="">UCT</div>
+                          </td>
+                          <td class="">  
+                              <div class="">50%</div> 
+                          </td>
+                          <td class="">  
+                              <div class="">45%</div> 
+                          </td>
+                        </tr>  
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+
+          {% include "inc/footer.html"%}
+        </div>
+      </div>
+    </div>
+
+    <!-- All javascript code in this project for now is just for demo DON'T RELY ON IT  -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.bundle.min.js"></script>
+    <!-- Select2 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+
+    <script src="{% static 'js/script.js' %}"></script>
+    <script src=" https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script>
+      $(document).ready(function() {
+            $('#example').DataTable( {
+                responsive: true,
+                dom: 'Bfrtip',
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                ]
+            } );
+        } );
+    </script>
+    <script>
+      const setup = () => {
+        const getTheme = () => {
+          if (window.localStorage.getItem('dark')) {
+            return JSON.parse(window.localStorage.getItem('dark'))
+          }
+
+          return !!window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        }
+
+        const setTheme = (value) => {
+          window.localStorage.setItem('dark', value)
+        }
+
+        const getColor = () => {
+          if (window.localStorage.getItem('color')) {
+            return window.localStorage.getItem('color')
+          }
+          return 'cyan'
+        }
+
+        const setColors = (color) => {
+          const root = document.documentElement
+          root.style.setProperty('--color-primary', `var(--color-${color})`)
+          root.style.setProperty('--color-primary-50', `var(--color-${color}-50)`)
+          root.style.setProperty('--color-primary-100', `var(--color-${color}-100)`)
+          root.style.setProperty('--color-primary-light', `var(--color-${color}-light)`)
+          root.style.setProperty('--color-primary-lighter', `var(--color-${color}-lighter)`)
+          root.style.setProperty('--color-primary-dark', `var(--color-${color}-dark)`)
+          root.style.setProperty('--color-primary-darker', `var(--color-${color}-darker)`)
+          this.selectedColor = color
+          window.localStorage.setItem('color', color)
+        }
+
+        
+        return {
+          loading: true,
+          isDark: getTheme(),
+          toggleTheme() {
+            this.isDark = !this.isDark
+            setTheme(this.isDark)
+          },
+          setLightTheme() {
+            this.isDark = false
+            setTheme(this.isDark)
+          },
+          setDarkTheme() {
+            this.isDark = true
+            setTheme(this.isDark)
+          },
+          color: getColor(),
+          selectedColor: 'blue',
+          setColors,
+          toggleSidbarMenu() {
+            this.isSidebarOpen = !this.isSidebarOpen
+          },
+          isMobileSubMenuOpen: false,
+          openMobileSubMenu() {
+            this.isMobileSubMenuOpen = true
+            this.$nextTick(() => {
+              this.$refs.mobileSubMenu.focus()
+            })
+          },
+          isMobileMainMenuOpen: false,
+          openMobileMainMenu() {
+            this.isMobileMainMenuOpen = true
+            this.$nextTick(() => {
+              this.$refs.mobileMainMenu.focus()
+            })
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
