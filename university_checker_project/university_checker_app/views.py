@@ -1,6 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic  import View, TemplateView, ListView, DetailView
-from .models import University, Tweets
+from .models import University, Tweets, FilteredTweets, ranking
 from .forms import RegistrationForm, CustomPasswordResetForm, UploadFileForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -10,9 +10,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetView
 import pandas as pd
 from .sentiment_analysis.university_tweet_fetching import project_sentiment_analysis
-import subprocess
-import sys
+from .sentiment_analysis.university_tweet_clearning import clean_twitter_text, generate_word_cloud
+import base64
 import os
+from django.db.models import Q
+
+IMAGE_DIR = os.path.join('static', 'images/wordcloud_images')
+
 
 
 # the following class will display list of universities
@@ -207,6 +211,8 @@ def project_view(request):
                 # Optionally, you can also save the sentiment data in a separate model if needed
 
                 success_message = 'Sentiment analysis completed successfully.'
+                return redirect('university_checker:overview', university=selected_university_name)
+
         else:
             custom_errors.append("Please select a university.")
 
@@ -217,13 +223,128 @@ def project_view(request):
         'custom_errors': custom_errors,
     })
 
-
-# the following will display sentiment of university
-def overview_view(request):
-     if not request.user.is_authenticated:
+def overview_view(request, university):
+    if not request.user.is_authenticated:
         return redirect('index')
-     else:
-         return render(request, 'project/overview.html')
+    else:
+        if university is not None:
+            university_obj = get_object_or_404(University, name=university)
+            tweets = Tweets.objects.filter(university_name=university_obj).values('tweet_text', 'created_at')
+
+            if tweets:
+                positive_text = ""
+                negative_text = ""
+                neutral_text = ""
+                wordcloud_positive=""
+                wordcloud_negative=""
+
+                for tweet in tweets:
+                    tweet_text = tweet['tweet_text']
+                    created_at = tweet.get('created_at', None)
+
+                    if not tweet_text:
+                        continue
+
+                    cleaned_text, sentiment = clean_twitter_text(tweet_text)
+
+                    if sentiment.get("sentiment", "") == "Positive":
+                        wordcloud_positive += cleaned_text + " "
+                        positive_text +=cleaned_text + ";"
+
+                    elif sentiment.get("sentiment", "") == "Negative":
+                        wordcloud_negative += cleaned_text + " "
+                        negative_text +=cleaned_text + ";"
+
+                    elif sentiment.get("sentiment", "") == "Neutral":
+                        neutral_text += cleaned_text + ";"
+                        
+
+                # Check if the entry already exists in FilteredTweets table
+                    existing_entry = FilteredTweets.objects.filter(
+                        Q(user=request.user) &
+                        Q(university_name=university_obj) &
+                        Q(filtered_tweet=cleaned_text)
+                    ).exists()
+                    cleaned_text, sentiment = clean_twitter_text(tweet_text)
+
+                    if not existing_entry:
+                        # Create and save the filtered tweet
+                        filtered_tweet = FilteredTweets(
+                            user=request.user,
+                            university_name=university_obj,
+                            filtered_tweet=cleaned_text,
+                            sentiment_score=sentiment.get('sentiment', None),
+                            created_at=created_at
+                        )
+                        filtered_tweet.save()
+
+                # Generate the WordCloud images
+                if wordcloud_positive:
+                    positive_wordcloud = generate_word_cloud(wordcloud_positive, "Positive Sentiment Word Cloud")
+                    positive_wordcloud_path = os.path.join(IMAGE_DIR, f'{university}_positive_wordcloud.png')
+                    with open(positive_wordcloud_path, 'wb') as f:
+                        f.write(base64.b64decode(positive_wordcloud))
+
+                if wordcloud_negative:
+                    negative_wordcloud = generate_word_cloud(wordcloud_negative, "Negative Sentiment Word Cloud")
+                    negative_wordcloud_path = os.path.join(IMAGE_DIR, f'{university}_negative_wordcloud.png')
+                    with open(negative_wordcloud_path, 'wb') as f:
+                        f.write(base64.b64decode(negative_wordcloud))
+                 # Calculate sentiment counts
+                positive_count = len(positive_text.split(';'))
+                negative_count = len(negative_text.split(';'))
+                neutral_count = len(neutral_text.split(';')) 
+                print("positive" + positive_text )
+
+                # Calculate sentiment counts
+                total_count = len(positive_text.split(";")) + len(negative_text.split(';')) + len(neutral_text.split(';'))
+
+                if total_count > 0:
+                    positive_percentage = (positive_count / total_count) * 100
+                    negative_percentage = (negative_count/ total_count) * 100
+                    neutral_percentage = (neutral_count/ total_count) * 100
+                else:
+                    positive_percentage = negative_percentage = neutral_percentage = 0
+                
+                 # Check if the entry already exists in ranking table
+                existing_entry1 = ranking.objects.filter(
+                    Q(user=request.user) &
+                    Q(name=university_obj) &
+                    Q(positive=positive_count) &
+                    Q(negative=negative_count)
+
+                ).exists()
+
+                if not existing_entry1:
+                    # Create and save the project 
+                    sentiment_project = ranking(
+                        user=request.user,
+                        name=university_obj,
+                        positive=positive_count,
+                        negative=negative_count,
+                        created_at=created_at
+                    )
+                    sentiment_project.save()
+
+
+                return render(request, 'project/overview.html', {
+                    'university_name': university,
+                    'positive_count': positive_count,
+                    'negative_count': negative_count,
+                    'neutral_count': neutral_count,
+                    'positive_percentage': positive_percentage,
+                    'negative_percentage': negative_percentage,
+                    'neutral_percentage': neutral_percentage,
+                    'created_at': created_at,
+                    'positive_wordcloud_path': positive_wordcloud_path if wordcloud_positive else None,
+                    'negative_wordcloud_path': negative_wordcloud_path if wordcloud_negative else None,
+                })
+            else:
+                return render(request, 'project/overview.html', {
+                    'error_message': f'No data found for {university}.',
+                })
+        else:
+            university_obj = get_object_or_404(University, name=university)
 
 
 def comparison_view(request):

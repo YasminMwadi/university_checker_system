@@ -6,8 +6,6 @@ class University(models.Model):
     university_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
-    # established_year = models.PositiveIntegerField()
-    # Add other fields as needed
 
     def __str__(self):
         return self.name
@@ -22,12 +20,33 @@ class Tweets(models.Model):
 
     def __str__(self):
         return f"{self.university_name} - {self.sentiment_score}"
+    
+class FilteredTweets(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    university_name = models.ForeignKey(University, on_delete=models.CASCADE)
+    filtered_tweet = models.TextField()
+    sentiment_score = models.CharField(max_length=100)
+    created_at = models.DateTimeField()
+
+    def __str__(self):
+        return f"Filtered Tweet by {self.user.username} at {self.created_at} for {self.university_name}"
 
     
 class SentimentResultAnalysis(models.Model):
     university = models.ForeignKey(University, on_delete=models.CASCADE)
-    sentiment = models.TextField()  # You can adjust the field type as needed
+    sentiment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Sentiment result for {self.university}: {self.sentiment}"
+    
+class ranking(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.ForeignKey(University, on_delete=models.CASCADE)
+    positive = models.IntegerField()
+    negative = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Sentiment result for {self.name}: {self.positive}: {self.negative}"
+ 

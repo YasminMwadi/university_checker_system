@@ -12,8 +12,6 @@
     <link rel="stylesheet" href= "{% static 'css/university.css' %}"/>
     <script src="https://cdn.jsdelivr.net/gh/alpine-collective/alpine-magic-helpers@0.5.x/dist/component.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.7.3/dist/alpine.min.js" defer></script>
-    <!-- Select2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css">  
   </head>
   <body>
     <div x-data="setup()" x-init="$refs.loading.classList.add('hidden'); setColors(color);" :class="{ 'dark': isDark}">
@@ -37,7 +35,7 @@
           <!-- Main content -->
           <main>
           <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
-              <h1 class="text-2xl font-semibold">Project Overview</h1>
+              <h1 class="text-2xl font-semibold">{{ university_name }} Overview</h1>
    
               <a
                 href="#"
@@ -60,9 +58,9 @@
                     >
                       Positive
                     </h6>
-                    <span class="text-xl font-semibold">45,021</span>
+                    <span class="text-xl font-semibold">{{ positive_count }}</span>
                     <span class="inline-block px-2 py-px ml-2 text-xs text-blue-500 rounded-md" style="background-color:  rgba(52, 144, 220, 0.2);">
-                      +3.1%
+                      {{ positive_percentage|floatformat:2 }}%
                     </span>
                   </div>
                   <div>
@@ -93,9 +91,9 @@
                     >
                       Negative
                     </h6>
-                    <span class="text-xl font-semibold">20,516</span>
+                    <span class="text-xl font-semibold">{{ negative_count }}</span>
                     <span class="inline-block px-2 py-px ml-2 text-xs rounded-md" style="background-color:  rgba(255, 0, 0, 0.2); color: hsla(0, 100%, 65%, 0.793);">
-                      +3.1%
+                      {{ negative_percentage|floatformat:2 }}%
                     </span>
 
                   </div>
@@ -117,9 +115,9 @@
                     >
                       Neutral
                     </h6>
-                    <span class="text-xl font-semibold">50,021</span>
+                    <span class="text-xl font-semibold">{{ neutral_count }}</span>
                     <span class="inline-block px-2 py-px ml-2 text-xs text-green-500 bg-green-100 rounded-md">
-                      +2.6%
+                      {{ neutral_percentage|floatformat:2 }}%
                     </span>
                   </div>
                   <div>
@@ -182,39 +180,45 @@
                   </div>
                   <!-- Chart -->
                   <div class="relative p-4 h-72">
-                    <canvas id="doughnutChart"></canvas>
+                    <canvas id="doughnutChart1"></canvas>
+                    <script>
+                      const positiveCount = {{ positive_count }};
+                      const negativeCount = {{ negative_count }};
+                      const neutralCount = {{ neutral_count }};
+                      console.log('Positive count:' + positiveCount); 
+                    </script>
                   </div>
                 </div>
               </div>
             <!-- Two grid columns wordcloud -->
             <div class="grid grid-cols-1 p-4 space-y-8 lg:gap-8 lg:space-y-0 lg:grid-cols-2">
-                <!-- Active users chart -->
-                <div class="col-span-1 bg-white rounded-md dark:bg-darker" >
+              <!-- Positive word cloud -->
+              <div class="col-span-1 bg-white rounded-md dark:bg-darker">
                   <!-- Card header -->
                   <div class="p-4 border-b dark:border-primary">
-                    <h4 class="text-lg font-semibold text-gray-500 dark:text-light">Positive wordcloud</h4>
+                      <h4 class="text-lg font-semibold text-gray-500 dark:text-light">Positive Wordcloud</h4>
                   </div>
                   <!-- Chart -->
                   <div class="relative p-4 h-72">
-                  <img class="" src="{% static 'images/word1.jpg' %}" alt="positive" />
-                   
+                      <img class=""  src="{% static 'images/wordcloud_images/' %}{{ university_name }}_positive_wordcloud.png" alt="Positive Wordcloud" />
                   </div>
-                </div>
-                <!-- Doughnut chart card -->
-                <div class="bg-white rounded-md dark:bg-darker" x-data="{ isOn: false }">
+              </div>
+              <!-- Negative Word cloud -->
+              <div class="bg-white rounded-md dark:bg-darker" x-data="{ isOn: false }">
                   <!-- Card header -->
                   <div class="flex items-center justify-between p-4 border-b dark:border-primary">
-                    <h4 class="text-lg font-semibold text-gray-500 dark:text-light">Negative Wordcloud</h4>
-                    <div class="flex items-center">
-                    </div>
+                      <h4 class="text-lg font-semibold text-gray-500 dark:text-light">Negative Wordcloud</h4>
+                      <div class="flex items-center">
+                      </div>
                   </div>
                   <!-- Chart -->
                   <div class="relative p-4 h-72">
-                  <img class="" src="{% static 'images/word2.jpg' %}" alt="positive" />
+                    <img class="" src="{% static 'images/wordcloud_images/' %}{{ university_name }}_negative_wordcloud.png" alt="Negative Wordcloud" />
+
                   </div>
-                </div>
               </div>
-            </div>
+          </div>
+          
           </main>
           {% include "inc/footer.html"%}
         </div>
@@ -224,6 +228,7 @@
     <!-- scripting -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.bundle.min.js"></script>
     <script src="{% static 'js/overview.js' %}"></script>
+    <script src="{% static 'js/overview1.js' %}"></script>
     <script>
       const setup = () => {
         const getTheme = () => {

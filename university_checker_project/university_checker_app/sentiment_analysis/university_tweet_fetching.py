@@ -74,8 +74,8 @@ def project_sentiment_analysis(university_name):
     return sentiment_results
 
 if __name__ == "__main__":
-    selected_university_name = "Tshwane university of technology"  # Replace with your university name
-    results = perform_sentiment_analysis(selected_university_name)
+    selected_university_name = "Tshwane university of technology"  
+    results = project_sentiment_analysis(selected_university_name)
 
     for result in results:
         print(result)

@@ -1,4 +1,4 @@
-// All javascript code in this project for now is just for demo DON'T RELY ON IT
+// the following code displays line and dougnut chart for a specific university
 
 const random = (max = 100) => {
     return Math.round(Math.random() * max) + 20
@@ -118,68 +118,5 @@ const random = (max = 100) => {
     },
   })
 
-  
-  const lineChart = new Chart(document.getElementById('lineChart'), {
-    type: 'line',
-    data: {
-      labels: months,
-      datasets: [
-        {
-          data: randomData(),
-          fill: false,
-          borderColor: colors.primary,
-          borderWidth: 2,
-          pointRadius: 0,
-          pointHoverRadius: 0,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      scales: {
-        yAxes: [
-          {
-            gridLines: false,
-            ticks: {
-              beginAtZero: false,
-              stepSize: 50,
-              fontSize: 12,
-              fontColor: '#97a4af',
-              fontFamily: 'Open Sans, sans-serif',
-              padding: 20,
-            },
-          },
-        ],
-        xAxes: [
-          {
-            gridLines: false,
-          },
-        ],
-      },
-      maintainAspectRatio: false,
-      legend: {
-        display: false,
-      },
-      tooltips: {
-        hasIndicator: true,
-        intersect: false,
-      },
-    },
-  })
-  
-  let randomUserCount = 0
-  
-  const usersCount = document.getElementById('usersCount')
-  
-  const fakeUsersCount = () => {
-    randomUserCount = random()
-    activeUsersChart.data.datasets[0].data.push(randomUserCount)
-    activeUsersChart.data.datasets[0].data.splice(0, 1)
-    activeUsersChart.update()
-    usersCount.innerText = randomUserCount
-  }
-  
-  setInterval(() => {
-    fakeUsersCount()
-  }, 1000)
+
   

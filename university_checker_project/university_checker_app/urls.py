@@ -7,7 +7,7 @@ urlpatterns = [
     path('forgot_password/', views.forgot_password_view, name='forgot_password'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('new_project/', views.project_view, name='new_project'),
-    path('overview/', views.overview_view, name='overview'),
+    path('overview/<str:university>/', views.overview_view, name='overview'),
     path('comparison/', views.comparison_view, name='comparison'),
     path('ranking/', views.ranking_view, name='ranking'),
     path('profile/', views.profile_view, name='profile'),
@@ -15,3 +15,4 @@ urlpatterns = [
     path('user_management/', views.user_management_view, name='user_management'),
     path('upload/', views.upload_excel, name='upload_excel'),
 ]
+ 
