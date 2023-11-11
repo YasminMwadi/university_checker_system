@@ -38,8 +38,8 @@ const barChart1 = new Chart(document.getElementById('barChart1'), {
         {
           label: 'Positive Sentiment',
           data: positiveCounts,
-          backgroundColor: colors.positive,
-          hoverBackgroundColor: colors.positiveDark,
+          backgroundColor: colors.primary,
+          hoverBackgroundColor: colors.primaryDark,
         },
       ],
     },
