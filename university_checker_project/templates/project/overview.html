@@ -167,7 +167,22 @@
                   </div>
                   <!-- Chart -->
                   <div class="relative p-4 h-72">
-                    <canvas id="barChart"></canvas>
+                    <canvas id="barChart1"></canvas>
+                    <script>
+                      const positiveCounts = [
+                          {% for count in positive_counts %}
+                              {{ count }},
+                          {% endfor %}
+                      ];
+                      console.log('Positive counts:', positiveCounts);
+
+                      const uniqueMonthsPositive = [
+                          {% for month in unique_months_positive %}
+                              '{{ month }}',
+                          {% endfor %}
+                      ];
+                      console.log('Unique Months Positive:', uniqueMonthsPositive);
+                    </script>
                   </div>
                 </div>
 
@@ -185,7 +200,6 @@
                       const positiveCount = {{ positive_count }};
                       const negativeCount = {{ negative_count }};
                       const neutralCount = {{ neutral_count }};
-                      console.log('Positive count:' + positiveCount); 
                     </script>
                   </div>
                 </div>
@@ -228,7 +242,7 @@
     <!-- scripting -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.bundle.min.js"></script>
     <script src="{% static 'js/overview.js' %}"></script>
-    <script src="{% static 'js/overview1.js' %}"></script>
+    <script src="{% static 'js/overview2.js' %}"></script>
     <script>
       const setup = () => {
         const getTheme = () => {

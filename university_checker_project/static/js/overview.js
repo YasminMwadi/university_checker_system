@@ -1,53 +1,45 @@
-// the following code displays line and dougnut chart for a specific university
+// doughnut_chart for overview
 
-const random = (max = 100) => {
-    return Math.round(Math.random() * max) + 20
-  }
-  
-  const randomData = () => {
-    return [
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-    ]
-  }
-  
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  
-  const cssColors = (color) => {
-    return getComputedStyle(document.documentElement).getPropertyValue(color)
-  }
-  
-  const getColor = () => {
-    return window.localStorage.getItem('color') ?? 'blue'
-  }
-  
-  const colors = {
-    primary: cssColors(`--color-${getColor()}`),
-    primaryLight: cssColors(`--color-${getColor()}-light`),
-    primaryLighter: cssColors(`--color-${getColor()}-lighter`),
-    primaryDark: cssColors(`--color-${getColor()}-dark`),
-    primaryDarker: cssColors(`--color-${getColor()}-darker`),
-  }
-  
-  const barChart = new Chart(document.getElementById('barChart'), {
+const doughnutChart1 = new Chart(document.getElementById('doughnutChart1'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Positive', 'Negative', 'Neutral'],
+        datasets: [
+            {
+                data: [positiveCount, negativeCount, neutralCount],
+                backgroundColor: [colors.primary, 'hsla(0, 100%, 65%, 0.793)', '#22c55e'],
+                borderWidth: 0,
+                weight: 0.5,
+            },
+        ],
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: {
+            position: 'bottom',
+        },
+        title: {
+            display: false,
+        },
+        animation: {
+            animateScale: true,
+            animateRotate: true,
+        },
+    },
+});
+
+
+const barChart1 = new Chart(document.getElementById('barChart1'), {
     type: 'bar',
     data: {
-      labels: months,
+      labels: uniqueMonthsPositive,  // Use the unique months as labels
       datasets: [
         {
-          data: randomData(),
-          backgroundColor: colors.primary,
-          hoverBackgroundColor: colors.primaryDark,
+          label: 'Positive Sentiment',
+          data: positiveCounts,
+          backgroundColor: colors.positive,
+          hoverBackgroundColor: colors.positiveDark,
         },
       ],
     },
@@ -58,7 +50,7 @@ const random = (max = 100) => {
             gridLines: false,
             ticks: {
               beginAtZero: true,
-              stepSize: 50,
+              stepSize: 1,  // Assuming counts are integers
               fontSize: 12,
               fontColor: '#97a4af',
               fontFamily: 'Open Sans, sans-serif',
@@ -83,40 +75,10 @@ const random = (max = 100) => {
       cornerRadius: 2,
       maintainAspectRatio: false,
       legend: {
-        display: false,
+        display: true,
       },
     },
-  })
+  });
   
-  const doughnutChart = new Chart(document.getElementById('doughnutChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Positive', 'Negative','Neutral'],
-      datasets: [
-        {
-          data: [random(), random(), random()],
-          backgroundColor: [colors.primary,'hsla(0, 100%, 65%, 0.793)', '#22c55e'],
-          borderWidth: 0,
-          weight: 0.5,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      legend: {
-        position: 'bottom',
-      },
   
-      title: {
-        display: false,
-      },
-      animation: {
-        animateScale: true,
-        animateRotate: true,
-      },
-    },
-  })
-
-
   

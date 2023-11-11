@@ -13,6 +13,7 @@ from .sentiment_analysis.university_tweet_fetching import project_sentiment_anal
 from .sentiment_analysis.university_tweet_clearning import clean_twitter_text, generate_word_cloud
 import base64
 import os
+from collections import Counter
 from django.db.models import Q
 
 IMAGE_DIR = os.path.join('static', 'images/wordcloud_images')
@@ -186,7 +187,7 @@ def project_view(request):
             if Tweets.objects.filter(user=request.user, university_name__name=selected_university_name).exists():
                 custom_errors.append("University has already been selected by you.")
             else:
-                print(f"Executing sentiment analysis for university: {selected_university_name}")
+                # print(f"Executing sentiment analysis for university: {selected_university_name}")
                 # Use the project_sentiment_analysis class to perform sentiment analysis
                 results = project_sentiment_analysis(selected_university_name)
 
@@ -238,6 +239,13 @@ def overview_view(request, university):
                 wordcloud_positive=""
                 wordcloud_negative=""
 
+                # Extract month from created_at and count occurrences
+                positive_dates_counter = Counter()
+                negative_dates_counter = Counter()
+                custom_month_order = [
+                    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                ]
+
                 for tweet in tweets:
                     tweet_text = tweet['tweet_text']
                     created_at = tweet.get('created_at', None)
@@ -257,15 +265,40 @@ def overview_view(request, university):
 
                     elif sentiment.get("sentiment", "") == "Neutral":
                         neutral_text += cleaned_text + ";"
-                        
+                    
+                    # Count positive and negative sentiment per month code
+                    sentiment_value = sentiment.get("sentiment", "")
+                    created_at = tweet.get('created_at', None)
 
-                # Check if the entry already exists in FilteredTweets table
+                    if sentiment_value == "Positive":
+                        positive_dates_counter[created_at.strftime('%b')] += 1
+                    elif sentiment_value == "Negative":
+                        negative_dates_counter[created_at.strftime('%b')] += 1
+
+                    # Extract unique months and their counts for positive sentiment
+                   # Sort the items based on the index of the month in custom_month_order
+                    if positive_dates_counter:
+                        sorted_positive_dates = sorted(positive_dates_counter.items(), key=lambda x: custom_month_order.index(x[0]))
+                        unique_months_positive, positive_counts = zip(*sorted_positive_dates)
+                    else:
+                        unique_months_positive, positive_counts = [], []
+
+                    # Similar modification for negative_dates_counter
+                    if negative_dates_counter:
+                        sorted_negative_dates = sorted(negative_dates_counter.items(), key=lambda x: custom_month_order.index(x[0]))
+                        unique_months_negative, negative_counts = zip(*sorted_negative_dates)
+                    else:
+                        unique_months_negative, negative_counts = [], []
+
+                    # End count positive and negative sentiment per month code
+                   
+                    # Add data to filteredTweet table in database
+                        # Check if the entry already exists in FilteredTweets table
                     existing_entry = FilteredTweets.objects.filter(
                         Q(user=request.user) &
                         Q(university_name=university_obj) &
                         Q(filtered_tweet=cleaned_text)
                     ).exists()
-                    cleaned_text, sentiment = clean_twitter_text(tweet_text)
 
                     if not existing_entry:
                         # Create and save the filtered tweet
@@ -277,6 +310,7 @@ def overview_view(request, university):
                             created_at=created_at
                         )
                         filtered_tweet.save()
+                    # End dd data to filteredTweet table in database
 
                 # Generate the WordCloud images
                 if wordcloud_positive:
@@ -291,10 +325,11 @@ def overview_view(request, university):
                     with open(negative_wordcloud_path, 'wb') as f:
                         f.write(base64.b64decode(negative_wordcloud))
                  # Calculate sentiment counts
+                # End generate the WordCloud images
                 positive_count = len(positive_text.split(';'))
                 negative_count = len(negative_text.split(';'))
                 neutral_count = len(neutral_text.split(';')) 
-                print("positive" + positive_text )
+                # print("positive" + positive_text )
 
                 # Calculate sentiment counts
                 total_count = len(positive_text.split(";")) + len(negative_text.split(';')) + len(neutral_text.split(';'))
@@ -325,8 +360,9 @@ def overview_view(request, university):
                         created_at=created_at
                     )
                     sentiment_project.save()
-
-
+                print("Positive Counts by Month:", positive_counts)
+                print("Below the Month:")
+                print(unique_months_positive)
                 return render(request, 'project/overview.html', {
                     'university_name': university,
                     'positive_count': positive_count,
@@ -335,7 +371,10 @@ def overview_view(request, university):
                     'positive_percentage': positive_percentage,
                     'negative_percentage': negative_percentage,
                     'neutral_percentage': neutral_percentage,
-                    'created_at': created_at,
+                    'unique_months_positive': unique_months_positive,
+                    'unique_months_negative': unique_months_negative,
+                    'positive_counts': positive_counts,
+                    'negative_counts': negative_counts,
                     'positive_wordcloud_path': positive_wordcloud_path if wordcloud_positive else None,
                     'negative_wordcloud_path': negative_wordcloud_path if wordcloud_negative else None,
                 })
