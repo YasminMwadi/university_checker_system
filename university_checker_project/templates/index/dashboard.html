@@ -9,12 +9,12 @@
       href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;700;900&display=swap"
       rel="stylesheet"
     />
+    <!-- Include Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href= "{% static 'css/university.css' %}"/>
     <script src="https://cdn.jsdelivr.net/gh/alpine-collective/alpine-magic-helpers@0.5.x/dist/component.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.7.3/dist/alpine.min.js" defer></script>
-    <!-- Select2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css">  
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.7.3/dist/alpine.min.js" defer></script> 
     <!-- data table -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
   </head>
@@ -29,9 +29,9 @@
           Loading.....
         </div>
 
-            <!-- Sidebar -->
+          <!-- Sidebar -->
             {% include "inc/sidebar.html"%}
-        <!-- end Sidebar -->
+          <!-- end Sidebar -->
 
         <div class="flex-1 h-full overflow-x-hidden overflow-y-auto">
           <!-- Header -->
@@ -39,15 +39,11 @@
 
           <!-- Main content -->
           <main>
-             <!-- Adding toast-->
-             {% include "inc/toast.html" %}
-             <!-- End toast  -->
             <!-- Content header -->
             <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
               <h1 class="text-2xl font-semibold">Dashboard</h1>
               <a
                 href="{% url 'university_checker:new_project' %}"
-                target="_blank"
                 class="px-4 py-2 text-sm text-white rounded-md bg-primary hover:bg-primary-dark focus:outline-none focus:ring focus:ring-primary focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark"
               >
                + Add a new project
@@ -56,10 +52,7 @@
 
             <!-- select -->
             <div class="mt-2">
-
-              <!-- Charts -->
               <div class="grid grid-cols-1 p-4 space-y-8 lg:gap-8 lg:space-y-0">
-                <!-- Line chart card -->
                 <div class="col-span-2 bg-white rounded-md dark:bg-darker" x-data="{ isOn: false }">
                   <!-- Card header -->
                   <div class="flex items-center justify-between p-4 border-b dark:border-primary">
@@ -68,7 +61,7 @@
                      
                     </div>
                   </div>
-                  <!-- Chart -->
+                  <!-- Projects -->
                   <div class="relative p-4 h-full h-72">
                     {% if projects %}
                       <table id="example" class="display hover" style="width:100%">
@@ -89,11 +82,6 @@
                                 <a href="{% url 'university_checker:overview' data.name %}" style="background-color: #4ade80;color: white;"class="mt-3 inline-flex 
                                   justify-center rounded-md px-3 py-2 text-sm font-semibold text-w-900 shadow-sm ">View</a>                                                                     
                               </td>
-                              {% comment %} <td class="">  
-                                <a href="#" style="background-color: #e53e3e;color: white;" id="open-btn" class="mt-3 inline-flex 
-                                    justify-center rounded-md px-3 py-2 text-sm font-semibold text-w-900 shadow-sm "
-                                    onclick="deleteItem('{{ data.name }}', '{{ data.id|stringformat:"d" }}')">Delete</a>
-                              </td> {% endcomment %}
                               <td class="">
                                 <a href="#" style="background-color: #e53e3e;color: white;" id="open-btn" class="mt-3 inline-flex justify-center rounded-md px-3 py-2 text-sm font-semibold text-w-900 shadow-sm"
                                   onclick="deleteItem('{{ data.name }}', '{{ data.id|stringformat:"d" }}')">Delete</a>
@@ -146,12 +134,8 @@
       </div>
     </div>
 
-    <!-- All javascript code in this project for now is just for demo DON'T RELY ON IT  -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.bundle.min.js"></script>
-    <!-- Select2 JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
-
-    <script src="{% static 'js/script.js' %}"></script>
+    <!-- Js code-->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
@@ -161,6 +145,7 @@
     </script>
 
     <script>
+      //script for switching dark mode and light mode
       const setup = () => {
         const getTheme = () => {
           if (window.localStorage.getItem('dark')) {
@@ -194,8 +179,6 @@
           window.localStorage.setItem('color', color)
           //
         }
-
-       
 
         return {
           loading: true,
@@ -234,66 +217,93 @@
           }
         }
       }
-      //delete model code
+      //End script for switching dark mode and light mode
+      //Delete model scripts
       function deleteItem(projectName, id) {
         let modal = document.getElementById('modal');
         let button = document.getElementById('ok-btn');
         let cancelBtn = document.getElementById('cancel-btn');
         let modalTitle = document.getElementById('modal-title');
         let modalContent = document.getElementById('modal-content');
-      
+    
         modal.style.display = 'block';
         modalTitle.innerText = `Delete project - ${projectName}`;
         modalContent.innerText = `Are you sure you want to delete the project '${projectName}'? All project data will be permanently removed. This action cannot be undone.`;
-      
+    
         button.onclick = function () {
           // Make an AJAX request to delete_project view
           fetch(`/university_checker/delete_project/${id}/`, {
-            method: 'DELETE',
+              method: 'DELETE',
               headers: {
-               'Content-Type': 'application/json',
-               'X-CSRFToken': getCookie('csrftoken'),
-             },
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': getCookie('csrftoken'),
+              },
           })
-         // alert(projectName);
-           .then(response => {
-             if (!response.ok) {
-               throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error(`HTTP error! Status: ${response.status}`);
+              }
               return response.json();
-           })
-            .then(data => {
-             if (data.success) {
-                // Show success toast
-                alert("Success");
-             //   document.getElementById('success-toast').style.display = 'block';
-              //  document.getElementById('success-message').innerText = data.message;
-      
-                // Hide the modal
-               modal.style.display = 'none';
-      
-                // Refresh the page
-                location.reload();
-             } else {
-                // Show error toast
-            //   document.getElementById('error-toast').style.display = 'block';
-           //     document.getElementById('error-message').innerText = data.message;
-           alert("Error");
+          })
+          .then(data => {
+            if (data.success) {
+              // Hide the modal
+              modal.style.display = 'none';
+          
+              Toastify({
+                  text: "Project deleted successfully",
+                  duration: 3000,
+                  newWindow: true,
+                  close: true,
+                  gravity: "top",
+                  position: "left",
+                  stopOnFocus: true, 
+                  backgroundColor: '#118C42',
+                  onClick: function(){} // Callback after click
+              }).showToast(); 
+          
+              // Delay the page reload until after the toast has disappeared
+              setTimeout(function() {
+                  location.reload();
+              }, 1000);
+            }
+           else {
+                  Toastify({
+                    text: 'Something went wrong. Try later',
+                    duration: 3000,
+                    newWindow: true,
+                    close: true,
+                    gravity: "top", 
+                    position: "left",
+                    stopOnFocus: true,
+                    backgroundColor: '#D42A46',
+                      onClick: function(){} 
+                  }).showToast();
               }
           })
-         .catch(error => console.error('Error:', error));
+          .catch(error => console.error('Error:', error));
         };
       
         cancelBtn.onclick = function () {
-          modal.style.display = 'none';
-        };
-      
-        window.onclick = function (event) {
-          if (event.target == modal) {
             modal.style.display = 'none';
-          }
+            Toastify({
+              text: "Deletion Cancelled",
+              duration: 3000,
+              newWindow: true,
+              close: true,
+              gravity: "top", 
+              position: "left",
+              stopOnFocus: true, 
+              backgroundColor: '#118C42',
+              onClick: function(){} 
+            }).showToast();
         };
     
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
         // Function to get CSRF token from cookie
         function getCookie(projectName) {
             let cookieValue = null;
@@ -310,7 +320,7 @@
             return cookieValue;
         }
     }
-    
+    // end models scripts
     </script>
     
   </body>

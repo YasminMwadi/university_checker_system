@@ -35,22 +35,24 @@ def delete_project(request, project_id):
 
     # Check if the user has the permission to delete the project
     if request.user == project.user:
-        project_name = project.name.name
+        # Store the project details before deleting
+        university_id = project.name.university_id  
 
-        # Delete related data in other tables
-        FilteredTweets.objects.filter(university_name=project_name).delete()
-        Tweets.objects.filter(university_name=project_name).delete()
+        # Delete related data in FilteredTweets and Tweets tables using university_name
+        FilteredTweets.objects.filter(university_name=university_id).delete()
+        Tweets.objects.filter(university_name=university_id).delete()
 
-        # Delete the project in the ranking table
+        # Delete the project in the ranking table using id
         project.delete()
 
         # Add success message
-        messages.success(request, f'Project {project_name} deleted successfully.')
+        messages.success(request, f'Project {project.name.name} deleted successfully.')
         return JsonResponse({'success': True, 'message': 'Project deleted successfully.'})
     else:
         # Add error message
-        messages.error(request, 'Something went wrong. try later.')
-        return JsonResponse({'success': False, 'message': 'Something went wrong. try later.'})
+        messages.error(request, 'Something went wrong. Try again later.')
+        return JsonResponse({'success': False, 'message': 'Something went wrong. Try again later.'})
+
     
 # the following function will upload list of university from excel file to db
 def upload_excel(request):
