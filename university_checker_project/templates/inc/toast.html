@@ -57,3 +57,60 @@
 {% endif %}
 </div>
 
+{% comment %} delete toat message {% endcomment %}
+<!-- Success toast -->
+{% if messages.success %}
+  <div
+    id="success-toast"
+    style="display: block;"
+    class="mb-6 rounded-lg text-sm shadow-lg shadow-black/5 success"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    data-te-autohide="false"
+    data-te-toast-init
+    data-te-toast-show
+    x-data="{ show: true }"
+    x-show="show"
+    x-transition:enter="transition-transform ease-out duration-300"
+    x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+    x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
+    x-transition:leave="transition-transform ease-in duration-300"
+    x-transition:leave-start="translate-y-0 opacity-100 sm:translate-x-0"
+    x-transition:leave-end="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+  >
+    <div style="background-color:#118C42" class="break-words rounded-b-lg px-4 py-4 text-success-700">
+        {{ messages.success }}
+    </div>
+  </div>
+{% endif %}
+
+<!-- Error toast -->
+{% if messages.error %}
+    {% for message in messages.error %}
+        <div
+        id="error-toast"
+        style="display: block;"
+        class="mb-6 rounded-lg text-sm shadow-lg shadow-black/5"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        data-te-autohide="false"
+        data-te-toast-init
+        data-te-toast-show
+        x-data="{ show: true }"
+        x-show="show"
+        x-transition:enter="transition-transform ease-out duration-300"
+        x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+        x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
+        x-transition:leave="transition-transform ease-in duration-300"
+        x-transition:leave-start="translate-y-0 opacity-100 sm:translate-x-0"
+        x-transition:leave-end="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+        >
+            <div style="background-color:#D42A46" class="break-words rounded-b-lg px-4 py-4 text-success-700">
+                {{ message }}
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
+

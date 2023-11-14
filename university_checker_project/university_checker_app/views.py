@@ -4,7 +4,7 @@ from .models import University, Tweets, FilteredTweets, ranking
 from .forms import RegistrationForm, CustomPasswordResetForm, UploadFileForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetView
@@ -27,6 +27,31 @@ class UniversityListView(ListView):
     context_object_name = 'university_list' 
     template_name = 'project/new_project.html'
 
+
+# delete project code
+
+def delete_project(request, project_id):
+    project = get_object_or_404(ranking, id=project_id)
+
+    # Check if the user has the permission to delete the project
+    if request.user == project.user:
+        project_name = project.name.name
+
+        # Delete related data in other tables
+        FilteredTweets.objects.filter(university_name=project_name).delete()
+        Tweets.objects.filter(university_name=project_name).delete()
+
+        # Delete the project in the ranking table
+        project.delete()
+
+        # Add success message
+        messages.success(request, f'Project {project_name} deleted successfully.')
+        return JsonResponse({'success': True, 'message': 'Project deleted successfully.'})
+    else:
+        # Add error message
+        messages.error(request, 'Something went wrong. try later.')
+        return JsonResponse({'success': False, 'message': 'Something went wrong. try later.'})
+    
 # the following function will upload list of university from excel file to db
 def upload_excel(request):
     if request.method == 'POST':
@@ -52,8 +77,6 @@ def upload_excel(request):
         form = UploadFileForm()
 
     return render(request, 'upload/excel_upload.html', {'form': form})
-
-
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'credentials/password_reset.html'  
@@ -170,7 +193,9 @@ def dashboard_view(request):
     if not request.user.is_authenticated: #check if the user is not logged in then he will be redirected to login page
          return redirect('index')
     else:
-        return render(request, 'index/dashboard.html')
+        projects = ranking.objects.filter(user=request.user)
+        print(projects)
+        return render(request, 'index/dashboard.html', {'projects': projects})
 
 @login_required
 def project_view(request):
