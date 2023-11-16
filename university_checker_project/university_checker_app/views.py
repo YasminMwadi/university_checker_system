@@ -19,7 +19,6 @@ from django.db.models import Q
 IMAGE_DIR = os.path.join('static', 'images/wordcloud_images')
 
 
-
 # the following class will display list of universities
 
 class UniversityListView(ListView):
@@ -36,14 +35,14 @@ def delete_project(request, project_id):
     # Check if the user has the permission to delete the project
     if request.user == project.user:
         # Store the project details before deleting
-        university_id = project.name.university_id  
+        university_id = project.name.university_id
 
-        # Delete related data in FilteredTweets and Tweets tables using university_name
-        FilteredTweets.objects.filter(university_name=university_id).delete()
-        Tweets.objects.filter(university_name=university_id).delete()
+        # Delete related data in FilteredTweets and Tweets tables using both university_name and user
+        FilteredTweets.objects.filter(university_name=university_id, user=request.user).delete()
+        Tweets.objects.filter(university_name=university_id, user=request.user).delete()
 
-        # Delete the project in the ranking table using id
-        project.delete()
+        # Delete the project in the ranking table using both id and user
+        ranking.objects.filter(id=project_id, user=request.user).delete()
 
         # Add success message
         messages.success(request, f'Project {project.name.name} deleted successfully.')
@@ -52,8 +51,7 @@ def delete_project(request, project_id):
         # Add error message
         messages.error(request, 'Something went wrong. Try again later.')
         return JsonResponse({'success': False, 'message': 'Something went wrong. Try again later.'})
-
-    
+   
 # the following function will upload list of university from excel file to db
 def upload_excel(request):
     if request.method == 'POST':
@@ -80,10 +78,12 @@ def upload_excel(request):
 
     return render(request, 'upload/excel_upload.html', {'form': form})
 
+# reset password view
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'credentials/password_reset.html'  
     form_class = CustomPasswordResetForm
 
+# user registration code
 def registration_view(request):
     field_to_focus = None # Initialize the field_to_focus
     success_message = None # Initialize the success_message
@@ -137,8 +137,7 @@ def registration_view(request):
             'registration_form': registration_form,
             'success_message': success_message,
         })
-
-
+#login code
 def index(request):
     if request.user.is_authenticated:
         return redirect('university_checker:dashboard')
@@ -181,24 +180,22 @@ def index(request):
             'success_message': success_message,
             'field_to_focus': field_to_focus,
         })
-
+#logout code
 @login_required
 def user_logout(request):
     logout(request)
     return  HttpResponseRedirect(reverse('index'))
-
-
+#forget passowrd code
 def forgot_password_view(request):
     return render(request, 'forgot_password.html')
-
+#dashboard code
 def dashboard_view(request):
     if not request.user.is_authenticated: #check if the user is not logged in then he will be redirected to login page
          return redirect('index')
     else:
         projects = ranking.objects.filter(user=request.user)
-        print(projects)
         return render(request, 'index/dashboard.html', {'projects': projects})
-
+#create project code
 @login_required
 def project_view(request):
     if not request.user.is_authenticated:
@@ -214,7 +211,6 @@ def project_view(request):
             if Tweets.objects.filter(user=request.user, university_name__name=selected_university_name).exists():
                 custom_errors.append("University has already been selected by you.")
             else:
-                # print(f"Executing sentiment analysis for university: {selected_university_name}")
                 # Use the project_sentiment_analysis class to perform sentiment analysis
                 results = project_sentiment_analysis(selected_university_name)
 
@@ -250,14 +246,14 @@ def project_view(request):
         'success_message': success_message,
         'custom_errors': custom_errors,
     })
-
+# project details code
 def overview_view(request, university):
     if not request.user.is_authenticated:
         return redirect('index')
     else:
         if university is not None:
             university_obj = get_object_or_404(University, name=university)
-            tweets = Tweets.objects.filter(university_name=university_obj).values('tweet_text', 'created_at')
+            tweets = Tweets.objects.filter(user=request.user).values('tweet_text', 'created_at')
 
             if tweets:
                 positive_text = ""
@@ -302,7 +298,7 @@ def overview_view(request, university):
                     elif sentiment_value == "Negative":
                         negative_dates_counter[created_at.strftime('%b')] += 1
 
-                    # Extract unique months and their counts for positive sentiment
+                   # Extract unique months and their counts for positive sentiment
                    # Sort the items based on the index of the month in custom_month_order
                     if positive_dates_counter:
                         sorted_positive_dates = sorted(positive_dates_counter.items(), key=lambda x: custom_month_order.index(x[0]))
@@ -356,7 +352,6 @@ def overview_view(request, university):
                 positive_count = len(positive_text.split(';'))
                 negative_count = len(negative_text.split(';'))
                 neutral_count = len(neutral_text.split(';')) 
-                # print("positive" + positive_text )
 
                 # Calculate sentiment counts
                 total_count = len(positive_text.split(";")) + len(negative_text.split(';')) + len(neutral_text.split(';'))
@@ -387,9 +382,7 @@ def overview_view(request, university):
                         created_at=created_at
                     )
                     sentiment_project.save()
-                print("Positive Counts by Month:", positive_counts)
-                print("Below the Month:")
-                print(unique_months_positive)
+                # university_link = extract_university_name(request)
                 return render(request, 'project/overview.html', {
                     'university_name': university,
                     'positive_count': positive_count,
@@ -413,17 +406,22 @@ def overview_view(request, university):
             university_obj = get_object_or_404(University, name=university)
 
 
-def comparison_view(request):
+def comparison_view(request, university):
     if not request.user.is_authenticated:
          return redirect('index')
     else:
-        return render(request, 'project/comparison.html')
+        
+        return render(request, 'project/comparison.html', {
+            'university_name': university,
+        })
 
-def ranking_view(request):
+def ranking_view(request, university):
     if not request.user.is_authenticated:
          return redirect('index')
     else:
-        return render(request, 'project/ranking.html')
+        return render(request, 'project/ranking.html',  {
+            'university_name': university,
+        })
 
 def profile_view(request):
     if not request.user.is_authenticated:

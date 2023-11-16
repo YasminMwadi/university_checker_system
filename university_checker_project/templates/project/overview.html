@@ -167,8 +167,9 @@
                   </div>
                   <!-- Chart -->
                   <div class="relative p-4 h-72">
-                    <canvas id="barChart1"></canvas>
+                    <canvas id="barChart"></canvas>
                     <script>
+                      //positive sentiments
                       const positiveCounts = [
                           {% for count in positive_counts %}
                               {{ count }},
@@ -176,12 +177,29 @@
                       ];
                       console.log('Positive counts:', positiveCounts);
 
+                      // negative sentiments
+                      const negativeCounts = [
+                          {% for count in negative_counts %}
+                              {{ count }},
+                          {% endfor %}
+                      ];
+                      console.log('Negative counts:', negativeCounts);
+                      
+                      // positve months
                       const uniqueMonthsPositive = [
                           {% for month in unique_months_positive %}
                               '{{ month }}',
                           {% endfor %}
                       ];
                       console.log('Unique Months Positive:', uniqueMonthsPositive);
+
+                      // negative months
+                      const uniqueMonthsNegative = [
+                          {% for month in unique_months_negative %}
+                              '{{ month }}',
+                          {% endfor %}
+                      ];
+                      console.log('Unique Months Negative:', uniqueMonthsNegative);
                     </script>
                   </div>
                 </div>
@@ -195,7 +213,7 @@
                   </div>
                   <!-- Chart -->
                   <div class="relative p-4 h-72">
-                    <canvas id="doughnutChart1"></canvas>
+                    <canvas id="doughnutChart"></canvas>
                     <script>
                       const positiveCount = {{ positive_count }};
                       const negativeCount = {{ negative_count }};
@@ -231,7 +249,7 @@
 
                   </div>
               </div>
-          </div>
+            </div>
           
           </main>
           {% include "inc/footer.html"%}
@@ -242,8 +260,6 @@
     <!-- scripting -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.bundle.min.js"></script>
     <script src="{% static 'js/overview.js' %}"></script>
-    <script src="{% static 'js/overview1.js' %}"></script>
-    {% comment %} <script src="{% static 'js/overview2.js' %}"></script> {% endcomment %}
     <script>
       const setup = () => {
         const getTheme = () => {
@@ -281,7 +297,7 @@
 
         const updateBarChart = (on) => {
           const data = {
-            data: randomData(),
+            data: negativeCounts,
             backgroundColor: 'hsla(0, 100%, 65%, 0.793)',
           }
           if (on) {
