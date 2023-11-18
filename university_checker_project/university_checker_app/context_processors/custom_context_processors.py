@@ -27,11 +27,3 @@ def university_link(request):
 
     # Return a dictionary with the variable you want to make available in templates
     return {'university_link': university_link}
-
-
-# def site_settings(request):
-#     university_link = request.path.split('/')[-1]
-#     # print("University Link:", university_link)
-#     print("Request Path:", request.path)
-
-#     return  {'site_name': university_link, 'site_creation_date': '12/12/12'}

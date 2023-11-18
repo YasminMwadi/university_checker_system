@@ -10,22 +10,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetView
 import pandas as pd
 from .sentiment_analysis.university_tweet_fetching import project_sentiment_analysis
-from .sentiment_analysis.university_tweet_clearning import clean_twitter_text, generate_word_cloud
-import base64
 import os
-from collections import Counter
-from django.db.models import Q
+import matplotlib.pyplot as plt
+from .processes.process import html_to_pdf 
+from .processes.comparison_process import compare_tweets, get_comparison_data
+from .processes.overview_process import process_tweets, generate_wordcloud_images, calculate_sentiment_counts, save_ranking_project
 
-IMAGE_DIR = os.path.join('static', 'images/wordcloud_images')
-
-
-# the following class will display list of universities
-
-class UniversityListView(ListView):
-    model = University 
-    context_object_name = 'university_list' 
-    template_name = 'project/new_project.html'
-
+IMAGE_DIR = os.path.join('static', 'images/wordcloud_images')   
 
 # delete project code
 
@@ -222,7 +213,7 @@ def project_view(request):
                     comment_date = sentiment['comment_date']
                     sentiment_score = sentiment['sentiment']
 
-                    # Create and save the tweet, associating it with the logged-in user
+                    # Create and save the tweet
                     tweet = Tweets(
                         user=request.user,
                         university_name=university,
@@ -231,8 +222,6 @@ def project_view(request):
                         created_at=comment_date
                     )
                     tweet.save()
-
-                # Optionally, you can also save the sentiment data in a separate model if needed
 
                 success_message = 'Sentiment analysis completed successfully.'
                 return redirect('university_checker:overview', university=selected_university_name)
@@ -246,7 +235,43 @@ def project_view(request):
         'success_message': success_message,
         'custom_errors': custom_errors,
     })
-# project details code
+
+#this will generate pdf for overview
+class Overview_generatePdf(View):
+    def get(self, request, *args, **kwargs):
+        pdf_displayed = True 
+        # You need to fetch the data needed for your PDF
+        university = self.kwargs['university']
+        if university is not None:
+            university_obj = get_object_or_404(University, name=university)
+            tweets = Tweets.objects.filter(user=request.user).values('tweet_text', 'created_at')
+
+            if tweets:
+                positive_text, negative_text, neutral_text, unique_months_positive, unique_months_negative, positive_counts, negative_counts, wordcloud_positive, wordcloud_negative = process_tweets(tweets, request.user, university_obj)
+                
+                positive_count, negative_count, neutral_count, positive_percentage, negative_percentage, neutral_percentage = calculate_sentiment_counts(positive_text, negative_text, neutral_text)
+         
+        context_data = self.get_context_data(university, positive_count, negative_count, neutral_count, 
+                         positive_percentage, negative_percentage, neutral_percentage, pdf_displayed)
+
+        # getting the template and rendering the template with context data
+        pdf = html_to_pdf('project/overview.html', context_data)
+        # returning the response
+        return HttpResponse(pdf, content_type='application/pdf')
+    def get_context_data(self, university, positive_count, negative_count, neutral_count, 
+                         positive_percentage, negative_percentage, neutral_percentage, pdf_displayed ):
+        return {
+            'university_name': university,
+            'positive_count': positive_count,
+            'negative_count': negative_count,
+            'neutral_count': neutral_count,
+            'positive_percentage': positive_percentage,
+            'negative_percentage': negative_percentage,
+            'neutral_percentage': neutral_percentage,
+            'pdf_displayed': pdf_displayed,
+        }    
+
+# project details 
 def overview_view(request, university):
     if not request.user.is_authenticated:
         return redirect('index')
@@ -256,133 +281,13 @@ def overview_view(request, university):
             tweets = Tweets.objects.filter(user=request.user).values('tweet_text', 'created_at')
 
             if tweets:
-                positive_text = ""
-                negative_text = ""
-                neutral_text = ""
-                wordcloud_positive=""
-                wordcloud_negative=""
-
-                # Extract month from created_at and count occurrences
-                positive_dates_counter = Counter()
-                negative_dates_counter = Counter()
-                custom_month_order = [
-                    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-                ]
-
-                for tweet in tweets:
-                    tweet_text = tweet['tweet_text']
-                    created_at = tweet.get('created_at', None)
-
-                    if not tweet_text:
-                        continue
-
-                    cleaned_text, sentiment = clean_twitter_text(tweet_text)
-
-                    if sentiment.get("sentiment", "") == "Positive":
-                        wordcloud_positive += cleaned_text + " "
-                        positive_text +=cleaned_text + ";"
-
-                    elif sentiment.get("sentiment", "") == "Negative":
-                        wordcloud_negative += cleaned_text + " "
-                        negative_text +=cleaned_text + ";"
-
-                    elif sentiment.get("sentiment", "") == "Neutral":
-                        neutral_text += cleaned_text + ";"
-                    
-                    # Count positive and negative sentiment per month code
-                    sentiment_value = sentiment.get("sentiment", "")
-                    created_at = tweet.get('created_at', None)
-
-                    if sentiment_value == "Positive":
-                        positive_dates_counter[created_at.strftime('%b')] += 1
-                    elif sentiment_value == "Negative":
-                        negative_dates_counter[created_at.strftime('%b')] += 1
-
-                   # Extract unique months and their counts for positive sentiment
-                   # Sort the items based on the index of the month in custom_month_order
-                    if positive_dates_counter:
-                        sorted_positive_dates = sorted(positive_dates_counter.items(), key=lambda x: custom_month_order.index(x[0]))
-                        unique_months_positive, positive_counts = zip(*sorted_positive_dates)
-                    else:
-                        unique_months_positive, positive_counts = [], []
-
-                    # Similar modification for negative_dates_counter
-                    if negative_dates_counter:
-                        sorted_negative_dates = sorted(negative_dates_counter.items(), key=lambda x: custom_month_order.index(x[0]))
-                        unique_months_negative, negative_counts = zip(*sorted_negative_dates)
-                    else:
-                        unique_months_negative, negative_counts = [], []
-
-                    # End count positive and negative sentiment per month code
-                   
-                    # Add data to filteredTweet table in database
-                        # Check if the entry already exists in FilteredTweets table
-                    existing_entry = FilteredTweets.objects.filter(
-                        Q(user=request.user) &
-                        Q(university_name=university_obj) &
-                        Q(filtered_tweet=cleaned_text)
-                    ).exists()
-
-                    if not existing_entry:
-                        # Create and save the filtered tweet
-                        filtered_tweet = FilteredTweets(
-                            user=request.user,
-                            university_name=university_obj,
-                            filtered_tweet=cleaned_text,
-                            sentiment_score=sentiment.get('sentiment', None),
-                            created_at=created_at
-                        )
-                        filtered_tweet.save()
-                    # End dd data to filteredTweet table in database
-
-                # Generate the WordCloud images
-                if wordcloud_positive:
-                    positive_wordcloud = generate_word_cloud(wordcloud_positive, "Positive Sentiment Word Cloud")
-                    positive_wordcloud_path = os.path.join(IMAGE_DIR, f'{university}_positive_wordcloud.png')
-                    with open(positive_wordcloud_path, 'wb') as f:
-                        f.write(base64.b64decode(positive_wordcloud))
-
-                if wordcloud_negative:
-                    negative_wordcloud = generate_word_cloud(wordcloud_negative, "Negative Sentiment Word Cloud")
-                    negative_wordcloud_path = os.path.join(IMAGE_DIR, f'{university}_negative_wordcloud.png')
-                    with open(negative_wordcloud_path, 'wb') as f:
-                        f.write(base64.b64decode(negative_wordcloud))
-                 # Calculate sentiment counts
-                # End generate the WordCloud images
-                positive_count = len(positive_text.split(';'))
-                negative_count = len(negative_text.split(';'))
-                neutral_count = len(neutral_text.split(';')) 
-
-                # Calculate sentiment counts
-                total_count = len(positive_text.split(";")) + len(negative_text.split(';')) + len(neutral_text.split(';'))
-
-                if total_count > 0:
-                    positive_percentage = (positive_count / total_count) * 100
-                    negative_percentage = (negative_count/ total_count) * 100
-                    neutral_percentage = (neutral_count/ total_count) * 100
-                else:
-                    positive_percentage = negative_percentage = neutral_percentage = 0
-                
-                 # Check if the entry already exists in ranking table
-                existing_entry1 = ranking.objects.filter(
-                    Q(user=request.user) &
-                    Q(name=university_obj) &
-                    Q(positive=positive_count) &
-                    Q(negative=negative_count)
-
-                ).exists()
-
-                if not existing_entry1:
-                    # Create and save the project 
-                    sentiment_project = ranking(
-                        user=request.user,
-                        name=university_obj,
-                        positive=positive_count,
-                        negative=negative_count,
-                        created_at=created_at
-                    )
-                    sentiment_project.save()
-                # university_link = extract_university_name(request)
+                positive_text, negative_text, neutral_text, unique_months_positive, unique_months_negative, positive_counts, negative_counts, wordcloud_positive, wordcloud_negative = process_tweets(tweets, request.user, university_obj)
+                positive_wordcloud_path, negative_wordcloud_path = generate_wordcloud_images(wordcloud_positive, wordcloud_negative, university)
+                # Call the function to calculate sentiment counts
+                positive_count, negative_count, neutral_count, positive_percentage, negative_percentage, neutral_percentage = calculate_sentiment_counts(positive_text, negative_text, neutral_text)
+                # Check if the entry already exists in ranking table
+                save_ranking_project(request.user, university_obj, positive_count, negative_count)
+                 # university_link = extract_university_name(request)
                 return render(request, 'project/overview.html', {
                     'university_name': university,
                     'positive_count': positive_count,
@@ -405,15 +310,141 @@ def overview_view(request, university):
         else:
             university_obj = get_object_or_404(University, name=university)
 
+# end project details
 
+#this will generate pdf for comparison
+class Comparison_generatePdf(View):
+    def get(self, request, *args, **kwargs):
+        url_positive = 0
+        url_negative = 0
+        select_positive = 0
+        select_negative = 0
+        url_positive_percentage = 0  # Default value
+        url_negative_percentage = 0  # Default value
+        select_positive_percentage = 0  # Default value
+        select_negative_percentage = 0  # Default value
+        pdf_displayed = True 
+        # You need to fetch the data needed for your PDF
+        university = self.kwargs['university']
+        select_university = self.kwargs['selected_university']
+        if university is not None and select_university is not None:
+           # Call the function to get comparison data
+            comparison_data = get_comparison_data(request.user, university, select_university)
+             # Access the data as needed
+            
+            url_positive=comparison_data['url_positive']
+            url_negative = comparison_data['url_negative']
+            select_positive= comparison_data['select_positive']
+            select_negative = comparison_data['select_negative']
+            url_positive_percentage = comparison_data['url_positive_percentage']
+            url_negative_percentage = comparison_data['url_negative_percentage']
+            select_positive_percentage = comparison_data['select_positive_percentage']
+            select_negative_percentage = comparison_data['select_negative_percentage']
+
+        context_data = self.get_context_data(university, select_university, url_positive, url_negative, 
+                         select_positive, select_negative, url_positive_percentage,url_negative_percentage,
+                          select_positive_percentage, select_negative_percentage, pdf_displayed)
+
+        # getting the template and rendering the template with context data
+        pdf = html_to_pdf('project/comparison.html', context_data)
+        # returning the response
+        return HttpResponse(pdf, content_type='application/pdf')
+    def get_context_data(self, university, select_university, url_positive, url_negative, 
+                         select_positive, select_negative, url_positive_percentage,url_negative_percentage,
+                          select_positive_percentage, select_negative_percentage, pdf_displayed):
+        return {
+            'university_name': university,
+            'select_university': select_university,
+            'url_positive': url_positive,
+            'url_negative': url_negative,
+            'select_positive': select_positive,
+            'select_negative': select_negative,
+            'url_positive_percentage': url_positive_percentage,
+            'url_negative_percentage': url_negative_percentage,
+            'select_positive_percentage': select_positive_percentage,
+            'select_negative_percentage': select_negative_percentage,
+            'pdf_displayed': pdf_displayed,
+        } 
+    # this will compare 2 universities
 def comparison_view(request, university):
     if not request.user.is_authenticated:
-         return redirect('index')
-    else:
-        
-        return render(request, 'project/comparison.html', {
-            'university_name': university,
-        })
+        return redirect('index')
+
+    success_message = None
+    custom_errors = []
+    selected_university_name = ''
+
+    # Initialize other variables with default values
+    url_positive = 0
+    url_negative = 0
+    select_positive = 0
+    select_negative = 0
+    positive_counts = []
+    positive_counts1 = []
+    unique_months_positive = []
+    unique_months_positive1 = []
+    unique_months_negative = []
+    unique_months_negative1 = []
+    url_positive_percentage = 0  # Default value
+    url_negative_percentage = 0  # Default value
+    select_positive_percentage = 0  # Default value
+    select_negative_percentage = 0  # Default value
+
+    if request.method == 'POST':
+        selected_university_name = request.POST.get('university')
+        if selected_university_name:
+            # Check if the university has already been selected by the logged-in user
+            if selected_university_name == university:
+                custom_errors.append("University has already been selected by you. Select another project")
+            else:
+                # Call the function to get comparison data
+                comparison_data = get_comparison_data(request.user, university, selected_university_name)
+
+                # Access the data as needed
+                positive_counts = comparison_data['positive_counts']
+                positive_counts1 = comparison_data['positive_counts1']
+                
+                url_positive=comparison_data['url_positive']
+                url_negative = comparison_data['url_negative']
+                select_positive= comparison_data['select_positive']
+                select_negative = comparison_data['select_negative']
+                url_positive_percentage = comparison_data['url_positive_percentage']
+                url_negative_percentage = comparison_data['url_negative_percentage']
+                select_positive_percentage = comparison_data['select_positive_percentage']
+                select_negative_percentage = comparison_data['select_negative_percentage']
+                unique_months_positive = comparison_data['unique_months_positive']
+                unique_months_positive1 = comparison_data['unique_months_positive1']
+                unique_months_negative = comparison_data['unique_months_negative']
+                unique_months_negative1 = comparison_data['unique_months_negative1']
+
+                success_message = 'University Selected.'
+
+        else:
+            custom_errors.append("Please select a university.")
+
+    projects = ranking.objects.filter(user=request.user)
+
+    return render(request, 'project/comparison.html', {
+        'project_list': projects,
+        'selected_university_name': selected_university_name,
+        'success_message': success_message,
+        'url_positive': url_positive,
+        'url_negative': url_negative,
+        'select_positive': select_positive,
+        'select_negative': select_negative,
+        'url_positive_percentage': url_positive_percentage,
+        'url_negative_percentage': url_negative_percentage,
+        'select_positive_percentage': select_positive_percentage,
+        'select_negative_percentage': select_negative_percentage,
+        'positive_counts': positive_counts,
+        'positive_counts1': positive_counts1,
+        'unique_months_positive': unique_months_positive,
+        'unique_months_positive1': unique_months_positive1,
+        'custom_errors': custom_errors,
+        'unique_months_negative': unique_months_negative,
+        'unique_months_negative1': unique_months_negative1,
+    })
+
 
 def ranking_view(request, university):
     if not request.user.is_authenticated:

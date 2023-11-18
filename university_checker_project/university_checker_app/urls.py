@@ -15,6 +15,8 @@ urlpatterns = [
     path('user_management/', views.user_management_view, name='user_management'),
     path('upload/', views.upload_excel, name='upload_excel'),
     path('delete_project/<int:project_id>/', views.delete_project, name='delete_project'),
+    path('overview_report/<str:university>/', views.Overview_generatePdf.as_view(),  name='overview_report'),
+    path('comparison_report/<str:university>/<str:selected_university>/', views.Comparison_generatePdf.as_view(), name='comparison_report'),  
 
 ]
  

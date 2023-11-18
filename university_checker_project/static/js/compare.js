@@ -1,29 +1,4 @@
-// All javascript code in this project for now is just for demo DON'T RELY ON IT
-
-const random = (max = 100) => {
-    return Math.round(Math.random() * max) + 20
-  }
-  
-  const randomData = () => {
-    return [
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-      random(),
-    ]
-  }
-  
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  
-  const cssColors = (color) => {
+const cssColors = (color) => {
     return getComputedStyle(document.documentElement).getPropertyValue(color)
   }
   
@@ -38,14 +13,15 @@ const random = (max = 100) => {
     primaryDark: cssColors(`--color-${getColor()}-dark`),
     primaryDarker: cssColors(`--color-${getColor()}-darker`),
   }
-  
+ 
+//  university 1 Doughnut charts
   const doughnutChart = new Chart(document.getElementById('doughnutChart'), {
     type: 'doughnut',
     data: {
       labels: ['Positive', 'Negative'],
       datasets: [
         {
-          data: [random(), random()],
+          data: [url_positive, url_negative],
           backgroundColor: [colors.primary,'hsla(0, 100%, 65%, 0.793)'],
           borderWidth: 0,
           weight: 0.5,
@@ -69,14 +45,14 @@ const random = (max = 100) => {
     },
   })
 
-//   comparison chart
+//   university 2 Doughnut chart
 const doughnutChart1 = new Chart(document.getElementById('doughnutChart1'), {
     type: 'doughnut',
     data: {
       labels: ['Positive', 'Negative'],
       datasets: [
         {
-          data: [random(), random()],
+          data: [select_positive, select_negative],
           backgroundColor: [colors.primary,'hsla(0, 100%, 65%, 0.793)'],
           borderWidth: 0,
           weight: 0.5,
@@ -99,16 +75,17 @@ const doughnutChart1 = new Chart(document.getElementById('doughnutChart1'), {
       },
     },
   })
-//   end donut
+
+//   Line chart for comparison
 
   const lineChart = new Chart(document.getElementById('lineChart'), {
     type: 'line',
     data: {
-      labels: months,
+      labels: uniqueMonthsPositive,
       datasets: [
         {
-          label: 'University 1',
-          data: randomData(),
+          label: university_url,
+          data: urlpositiveCounts,
           fill: false,
           borderColor: colors.primary,
           borderWidth: 2,
@@ -116,8 +93,8 @@ const doughnutChart1 = new Chart(document.getElementById('doughnutChart1'), {
           pointHoverRadius: 0,
         },
         {
-            label: 'University 2',
-            data: randomData(),
+            label: selected_university,
+            data: selectpositiveCounts,
             fill: false,
             borderColor: 'hsla(0, 100%, 65%, 0.793)',
             borderWidth: 2,
@@ -158,8 +135,3 @@ const doughnutChart1 = new Chart(document.getElementById('doughnutChart1'), {
       },
     },
   })
-
-//   test
-
-
-  

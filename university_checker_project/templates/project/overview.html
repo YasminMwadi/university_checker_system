@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.7.3/dist/alpine.min.js" defer></script>
   </head>
   <body>
+    {% if not pdf_displayed %}
     <div x-data="setup()" x-init="$refs.loading.classList.add('hidden'); setColors(color);" :class="{ 'dark': isDark}">
       <div class="flex h-screen antialiased text-gray-900 bg-gray-100 dark:bg-dark dark:text-light">
         <!-- Loading screen -->
@@ -34,11 +35,11 @@
 
           <!-- Main content -->
           <main>
-          <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
+            <div class="flex items-center justify-between px-4 py-4 border-b lg:py-6 dark:border-primary-darker">
               <h1 class="text-2xl font-semibold">{{ university_name }} Overview</h1>
    
               <a
-                href="#"
+                href="{% url 'university_checker:overview_report' university_name %}"
                 target="_blank"
                 class="px-4 py-2 text-sm text-white rounded-md bg-primary hover:bg-primary-dark focus:outline-none focus:ring focus:ring-primary focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark"
               >
@@ -256,7 +257,32 @@
         </div>
       </div>
     </div>
-
+    {% elif pdf_displayed %}
+    <div class="container">  
+      <h1 style="text-align: center;" class="display-5 fw-bold">{{ university_name }} Report</h1>
+      <P>This report provides an overview of sentiment analysis for tweets related to {{university_name}}.
+           The sentiment analysis categorizes tweets into three main sentiments: Positive, Negative, and The sentiment analysis categorizes tweets into three main sentiments: Positive, Negative, and Neutral. 
+           Here is a summary of the sentiment distribution: </p>
+      <div class="row align-items-md-stretch">
+          <h5><strong>Positive:</strong> {{ positive_count}} ({{ positive_percentage|floatformat:2 }}%)</h5>
+          <h5><strong>Negative:</strong> {{ negative_count}} ({{ negative_percentage|floatformat:2 }}%)</h5>
+          <h5><strong>Neutral:</strong> {{ neutral_count}} ({{ neutral_percentage|floatformat:2 }}%)</h5>
+      </div>
+      <h3 style="text-align: center;margin-top:25px;margin-bottom:25px;">Clonclusion </h3>
+      <div class="row align-items-md-stretch">
+          {% if positive_count > negative_count and positive_count > neutral_count %}
+          <p>Social media discussions about {{ university_name }} predominantly express positive sentiments. Users are sharing their positive experiences, achievements, and appreciation for the university.</p>
+          {% elif negative_count > positive_count and negative_count > neutral_count %}
+              <p>There is a notable presence of negative sentiments in social media conversations about {{ university_name }}. Users may be expressing concerns, criticisms, or dissatisfaction with certain aspects of the university.</p>
+          {% elif neutral_count > positive_count and neutral_count > negative_count %}
+              <p>Many tweets about {{ university_name }} have a neutral tone, indicating a mix of general information, statements, or discussions without a distinctly positive or negative sentiment. The conversation appears balanced and informational.</p>
+          {% elif positive_count == negative_count and positive_count == neutral_count %}
+              <p>Discussions about {{ university_name }} on social media exhibit a balanced mix of positive, negative, and neutral sentiments. Users have diverse opinions and experiences, contributing to a well-rounded view of the university.</p>
+          {% else %}
+              <p>The sentiment analysis reveals a variety of opinions and emotions in discussions about {{ university_name }} on social media. Users express a range of sentiments, providing valuable insights into the multifaceted perception of the university.</p>
+          {% endif %}
+  </div>
+    {% endif %}
     <!-- scripting -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.bundle.min.js"></script>
     <script src="{% static 'js/overview.js' %}"></script>
@@ -297,6 +323,7 @@
 
         const updateBarChart = (on) => {
           const data = {
+            label: 'Negative Sentiment',
             data: negativeCounts,
             backgroundColor: 'hsla(0, 100%, 65%, 0.793)',
           }
