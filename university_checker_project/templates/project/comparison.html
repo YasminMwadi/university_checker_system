@@ -303,28 +303,33 @@
     {% elif pdf_displayed %}
     <div class="container">  
       <h1 style="text-align: center;" class="display-5 fw-bold">{{ university_name }} and {{ select_university }} Comparison Report</h1>
-      <P>This report provides an overview of sentiment analysis for tweets related to {{university_name}}.
-           The sentiment analysis categorizes tweets into three main sentiments: Positive, Negative, and The sentiment analysis categorizes tweets into three main sentiments: Positive, Negative, and Neutral. 
-           Here is a summary of the sentiment distribution: </p>
+      <p> This report provides a comparative analysis of social media discussions related to
+        {{ university_name }} and {{ select_university }}. The sentiment analysis aims to 
+        uncover patterns and trends in user opinions and emotions expressed on tweeter.</p>
+      <P> Here is a summary of the comparison: </p>
       <div class="row align-items-md-stretch">
-          <h5><strong>Positive:</strong> {{ url_positive}} ({{ positive_percentage|floatformat:2 }}%)</h5>
-          <h5><strong>Negative:</strong> {{ negative_count}} ({{ negative_percentage|floatformat:2 }}%)</h5>
-          <h5><strong>Neutral:</strong> {{ neutral_count}} ({{ neutral_percentage|floatformat:2 }}%)</h5>
+          <h5><strong>{{ university_name }} Positive:</strong> {{ url_positive}} ({{ url_positive_percentage|floatformat:2 }}%)</h5>
+          <h5><strong>{{ university_name }} Negative:</strong> {{ url_negative}} ({{ url_negative_percentage|floatformat:2 }}%)</h5>
+          <h5><strong>{{ select_university }} Positive:</strong> {{ select_positive}} ({{ select_positive_percentage|floatformat:2 }}%)</h5>
+          <h5><strong>{{ select_university }} Negative:</strong> {{ select_negative}} ({{ select_negative_percentage|floatformat:2 }}%)</h5>
       </div>
-      <h3 style="text-align: center;margin-top:25px;margin-bottom:25px;">Clonclusion </h3>
+      <h3 style="text-align: center;margin-top:25px;margin-bottom:25px;">Conclusion </h3>
       <div class="row align-items-md-stretch">
-          {% if positive_count > negative_count and positive_count > neutral_count %}
-          <p>Social media discussions about {{ university_name }} predominantly express positive sentiments. Users are sharing their positive experiences, achievements, and appreciation for the university.</p>
-          {% elif negative_count > positive_count and negative_count > neutral_count %}
-              <p>There is a notable presence of negative sentiments in social media conversations about {{ university_name }}. Users may be expressing concerns, criticisms, or dissatisfaction with certain aspects of the university.</p>
-          {% elif neutral_count > positive_count and neutral_count > negative_count %}
-              <p>Many tweets about {{ university_name }} have a neutral tone, indicating a mix of general information, statements, or discussions without a distinctly positive or negative sentiment. The conversation appears balanced and informational.</p>
-          {% elif positive_count == negative_count and positive_count == neutral_count %}
-              <p>Discussions about {{ university_name }} on social media exhibit a balanced mix of positive, negative, and neutral sentiments. Users have diverse opinions and experiences, contributing to a well-rounded view of the university.</p>
-          {% else %}
-              <p>The sentiment analysis reveals a variety of opinions and emotions in discussions about {{ university_name }} on social media. Users express a range of sentiments, providing valuable insights into the multifaceted perception of the university.</p>
-          {% endif %}
+        {% if url_positive > select_positive %}
+        <p>Social media discussions about {{ university_name }} show a higher proportion of positive sentiments compared to {{ select_university }}. Users are sharing positive experiences, achievements, and appreciation for {{ university_name }}.</p>
+        {% elif select_positive > url_positive %}
+            <p>Social media discussions about {{ select_university }} show a higher proportion of positive sentiments compared to {{ university_name }}. Users are expressing positive experiences, achievements, and appreciation for {{ select_university }}.</p>
+        {% elif url_positive == select_positive %}
+            <p>The positive sentiments in discussions about {{ university_name }} and {{ select_university }} are equal. Users express a similar level of positive experiences, contributing to a balanced perception of both universities.</p>
+        {% endif %}
 
+        {% if url_negative > select_negative %}
+          <p>Conversely, there is a higher presence of negative sentiments in discussions about {{ university_name }} compared to {{ select_university }}. Users may be expressing concerns, criticisms, or dissatisfaction with certain aspects of {{ university_name }}.</p>
+        {% elif select_negative > url_negative %}
+            <p>Conversely, there is a higher presence of negative sentiments in discussions about {{ select_university }} compared to {{ university_name }}. Users may be expressing concerns, criticisms, or dissatisfaction with certain aspects of {{ select_university }}.</p>
+        {% elif url_negative == select_negative %}
+            <p>The negative sentiments in discussions about {{ university_name }} and {{ select_university }} are equal. Users express a similar level of negative experiences, contributing to a balanced perception of both universities.</p>
+        {% endif %}
           <div style="margin-top: 20%;"> {% include "inc/footer.html"%}</div>
   </div>
     {% endif %}

@@ -54,93 +54,44 @@
                   <!-- Card header -->
                   <div class="flex items-center justify-between p-4 border-b dark:border-primary">
                     <h4 class="text-lg font-semibold text-gray-500 dark:text-light">University Ranges</h4>
-                   
+                    <p>Create more project to see their ranking amoung public university in south africa </p>
                   </div>
+                  {% if rankings%}
                   <!-- data table -->
                   <div class="relative p-4 h-full h-72">
                     <table id="example" class="display nowrap" style="width:100%">
-                      <thead>
-                        <tr>
-                          <th class="">Rank</th>
-                          <th>University</th>
-                          <th>Positive</th>
-                          <th>Negative</th>
-                        </tr>
-                      </thead>
-                      <tbody> 
-                        <tr>   
-                          <td class="">
-                              <div class="">1</div>
-                          </td> 
-                          <td class="" >
-                              <div class="">UP</div>
-                          </td>
-                          <td class="">  
-                              <div class="">67%</div> 
-                          </td>
-                          <td class="">  
-                              <div class="">34%</div> 
-                          </td>
-                        </tr>  
-                        <tr>   
-                          <td class="">
-                              <div class="">2</div>
-                          </td> 
-                          <td class="" >
-                              <div class="">TUT</div>
-                          </td>
-                          <td class="">  
-                              <div class="">65%</div> 
-                          </td>
-                          <td class="">  
-                              <div class="">40%</div> 
-                          </td>
-                        </tr>  
-                        <tr>   
-                          <td class="">
-                              <div class="">3</div>
-                          </td> 
-                          <td class="" >
-                              <div class="">UNISA</div>
-                          </td>
-                          <td class="">  
-                              <div class="">60%</div> 
-                          </td>
-                          <td class="">  
-                              <div class="">40%</div> 
-                          </td>
-                        </tr>   
-                        <tr>   
-                          <td class="">
-                              <div class="">4</div>
-                          </td> 
-                          <td class="" >
-                              <div class="">UJ</div>
-                          </td>
-                          <td class="">  
-                              <div class="">59%</div> 
-                          </td>
-                          <td class="">  
-                              <div class="">45%</div> 
-                          </td>
-                        </tr>   
-                        <tr>   
-                          <td class="">
-                              <div class="">5</div>
-                          </td> 
-                          <td class="" >
-                              <div class="">UCT</div>
-                          </td>
-                          <td class="">  
-                              <div class="">50%</div> 
-                          </td>
-                          <td class="">  
-                              <div class="">45%</div> 
-                          </td>
-                        </tr>  
-                      </tbody>
+                        <thead>
+                            <tr>
+                                <th class="">Rank</th>
+                                <th>University</th>
+                                <th>Positive</th>
+                                <th>Negative</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ranking in rankings %}
+                                <tr>
+                                    <td class="">
+                                        <div class="">{{ forloop.counter }}</div>
+                                    </td>
+                                    <td class="">
+                                        <div class="">{{ ranking.name }}</div>
+                                    </td>
+                                    <td class="">
+                                        <div class="">{{ ranking.positive }}%</div>
+                                    </td>
+                                    <td class="">
+                                        <div class="">{{ ranking.negative }}%</div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
                     </table>
-                  </div>
+                </div>
+                
+                  {%else%}
+                  <p>Create more project to see thier ranking amoung public university in south africa </p>
+                  {%endif%}
                 </div>
               </div>
             </div>

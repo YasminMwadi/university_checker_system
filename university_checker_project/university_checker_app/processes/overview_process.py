@@ -17,9 +17,10 @@ def save_ranking_project(request_user, university_obj, positive_count, negative_
         ranking_entry = ranking.objects.get(user=request_user, name=university_obj)
 
         # If the entry exists, update the values
-        ranking_entry.positive = positive_count
-        ranking_entry.negative = negative_count
-        ranking_entry.save()
+        # ranking_entry.positive = positive_count
+        # ranking_entry.negative = negative_count
+        # ranking_entry.save()
+        print(ranking_entry)
 
     except ranking.DoesNotExist:
         # If the entry does not exist, create and save a new one
@@ -41,7 +42,7 @@ def save_filtered_tweet(request_user, university_obj, cleaned_text, sentiment, c
     try:
         # Try to get the existing filtered tweet entry
         existing_entry = FilteredTweets.objects.get(user=request_user, university_name=university_obj)
-
+        # print (existing_entry)
         # If the entry exists, update the values
         existing_entry.filtered_tweet = cleaned_text
         existing_entry.sentiment_score = sentiment.get('sentiment', None)
@@ -133,13 +134,13 @@ def generate_wordcloud_images(wordcloud_positive, wordcloud_negative, university
     negative_wordcloud_path = None
 
     if wordcloud_positive:
-        positive_wordcloud = generate_word_cloud(wordcloud_positive, "Positive Sentiment Word Cloud")
+        positive_wordcloud = generate_word_cloud(wordcloud_positive, f"{university} Positive Sentiment Word Cloud")
         positive_wordcloud_path = os.path.join(IMAGE_DIR, f'{university}_positive_wordcloud.png')
         with open(positive_wordcloud_path, 'wb') as f:
             f.write(base64.b64decode(positive_wordcloud))
 
     if wordcloud_negative:
-        negative_wordcloud = generate_word_cloud(wordcloud_negative, "Negative Sentiment Word Cloud")
+        negative_wordcloud = generate_word_cloud(wordcloud_negative, f"{university} Negative Sentiment Word Cloud")
         negative_wordcloud_path = os.path.join(IMAGE_DIR, f'{university}_negative_wordcloud.png')
         with open(negative_wordcloud_path, 'wb') as f:
             f.write(base64.b64decode(negative_wordcloud))

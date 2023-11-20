@@ -278,7 +278,9 @@ def overview_view(request, university):
     else:
         if university is not None:
             university_obj = get_object_or_404(University, name=university)
-            tweets = Tweets.objects.filter(user=request.user).values('tweet_text', 'created_at')
+            # tweets = Tweets.objects.filter(user=request.user).values('tweet_text', 'created_at')
+            tweets = Tweets.objects.filter(user=request.user, university_name=university_obj).values('tweet_text', 'created_at')
+
 
             if tweets:
                 positive_text, negative_text, neutral_text, unique_months_positive, unique_months_negative, positive_counts, negative_counts, wordcloud_positive, wordcloud_negative = process_tweets(tweets, request.user, university_obj)
@@ -446,13 +448,20 @@ def comparison_view(request, university):
     })
 
 
-def ranking_view(request, university):
-    if not request.user.is_authenticated:
-         return redirect('index')
-    else:
-        return render(request, 'project/ranking.html',  {
-            'university_name': university,
-        })
+class RankingListView(ListView):
+    model = ranking
+    template_name = 'project/ranking.html'
+    context_object_name = 'rankings'
+
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return ranking.objects.none()
+        return ranking.objects.filter(user=self.request.user).order_by('-positive')
+
+    def dispatch(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect('index')
+        return super().dispatch(request, *args, **kwargs)
 
 def profile_view(request):
     if not request.user.is_authenticated:

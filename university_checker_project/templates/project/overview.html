@@ -268,7 +268,7 @@
           <h5><strong>Negative:</strong> {{ negative_count}} ({{ negative_percentage|floatformat:2 }}%)</h5>
           <h5><strong>Neutral:</strong> {{ neutral_count}} ({{ neutral_percentage|floatformat:2 }}%)</h5>
       </div>
-      <h3 style="text-align: center;margin-top:25px;margin-bottom:25px;">Clonclusion </h3>
+      <h3 style="text-align: center;margin-top:25px;margin-bottom:25px;">Conclusion </h3>
       <div class="row align-items-md-stretch">
           {% if positive_count > negative_count and positive_count > neutral_count %}
           <p>Social media discussions about {{ university_name }} predominantly express positive sentiments. Users are sharing their positive experiences, achievements, and appreciation for the university.</p>
@@ -323,6 +323,7 @@
 
         const updateBarChart = (on) => {
           const data = {
+            labels: uniqueMonthsNegative, 
             label: 'Negative Sentiment',
             data: negativeCounts,
             backgroundColor: 'hsla(0, 100%, 65%, 0.793)',
