@@ -1,4 +1,5 @@
 # university_checker_app/context_processors/custom_context_processors.py
+from university_checker_app.models import Profile  # Import your Profile model
 
 def university_link(request):
     # Get the path of the request
@@ -9,8 +10,8 @@ def university_link(request):
         index = path_components.index('overview')
     elif 'comparison' in path_components:
         index = path_components.index('comparison')
-    elif 'ranking' in path_components:
-        index = path_components.index('ranking')
+    # elif 'ranking' in path_components:
+    #     index = path_components.index('ranking')
     else:
         # If none of the keywords are found, set index to -1
         index = -1
@@ -21,9 +22,14 @@ def university_link(request):
     else:
         university_link = None
 
-    # Print for debugging
-    print("Request Path:", request.path)
-    print("University Link:", university_link)
+    # Get the user's profile picture
+    user_profile_pic = None
+    if request.user.is_authenticated:
+        try:
+            user_profile = Profile.objects.get(user=request.user)
+            user_profile_pic = user_profile.profile_pic.url if user_profile.profile_pic else None
+        except Profile.DoesNotExist:
+            pass
 
-    # Return a dictionary with the variable you want to make available in templates
-    return {'university_link': university_link}
+    # Return a dictionary with the variables url and profile pic
+    return {'university_link': university_link, 'user_profile_pic': user_profile_pic}

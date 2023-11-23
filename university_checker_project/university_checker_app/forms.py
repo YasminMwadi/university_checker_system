@@ -5,9 +5,77 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.contrib.auth import get_user_model
+from .models import Profile
 
 
+# profile form
+class ProfilePictureForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ('profile_pic',)
 
+    profile_pic = forms.ImageField(
+        widget=forms.FileInput(
+            attrs={'class': 'w-full px-4 py-2 border rounded-md dark:bg-darker dark:border-gray-700 focus:outline-none focus:ring focus:ring-primary-100 dark:focus:ring-primary-darker',
+                   'accept': 'image/*'}  # Specify that only image files are accepted
+        ),
+        label='Profile Picture',
+        required=False
+    )
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ('gender', 'role', 'description')
+
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+    ]
+
+    gender = forms.ChoiceField(
+        choices=GENDER_CHOICES,
+        widget=forms.Select(
+            attrs={
+                'class': 'w-full px-4 py-2 border rounded-md dark:bg-darker dark:border-gray-700 focus:outline-none focus:ring focus:ring-primary-100 dark:focus:ring-primary-darker',
+                'id': 'id_gender',
+            }
+        ),
+        label=False,
+        required=False
+    )
+
+    ROLE_CHOICES = [
+        ('professor', 'Professor'),
+        ('student', 'Student'),
+        ('research', 'Researcher'),
+        ('lecturer', 'Lecturer'),
+        ('parent', 'Parent'),
+        ('university_director', 'University Director'),
+        ('university_admin', 'University Admin'),
+        ('none', 'None'),
+    ]
+
+    role = forms.ChoiceField(
+        choices=ROLE_CHOICES,
+        widget=forms.Select(
+            attrs={
+                'class': 'w-full px-4 py-2 border rounded-md dark:bg-darker dark:border-gray-700 focus:outline-none focus:ring focus:ring-primary-100 dark:focus:ring-primary-darker',
+                'id': 'id_role',
+            }
+        ),
+        label=False,
+        required=False
+    )
+
+    description = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'class': 'w-full px-4 py-8 border rounded-md dark:bg-darker dark:border-gray-700 focus:outline-none focus:ring focus:ring-primary-100 dark:focus:ring-primary-darker',
+                   'placeholder': 'Description', 'id': 'id_description'}),
+        label=False,
+        required=False
+    )
+#form for uploading excel file
 class UploadFileForm(forms.Form):
     file = forms.FileField()
 
@@ -29,7 +97,7 @@ class CustomPasswordResetForm(PasswordResetForm):
             'required': 'required'
         }),
     )
-
+# registration form
 class RegistrationForm(forms.ModelForm):
     username = forms.CharField(
         widget=forms.TextInput(

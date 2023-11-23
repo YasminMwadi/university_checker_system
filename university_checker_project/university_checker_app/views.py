@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic  import View, TemplateView, ListView, DetailView
-from .models import University, Tweets, FilteredTweets, ranking
-from .forms import RegistrationForm, CustomPasswordResetForm, UploadFileForm
+from .models import University, Tweets, FilteredTweets, ranking, Profile
+from .forms import RegistrationForm, CustomPasswordResetForm, UploadFileForm, UserProfileForm, ProfilePictureForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
@@ -278,7 +278,6 @@ def overview_view(request, university):
     else:
         if university is not None:
             university_obj = get_object_or_404(University, name=university)
-            # tweets = Tweets.objects.filter(user=request.user).values('tweet_text', 'created_at')
             tweets = Tweets.objects.filter(user=request.user, university_name=university_obj).values('tweet_text', 'created_at')
 
 
@@ -288,8 +287,7 @@ def overview_view(request, university):
                 # Call the function to calculate sentiment counts
                 positive_count, negative_count, neutral_count, positive_percentage, negative_percentage, neutral_percentage = calculate_sentiment_counts(positive_text, negative_text, neutral_text)
                 # Check if the entry already exists in ranking table
-                save_ranking_project(request.user, university_obj, positive_count, negative_count)
-                 # university_link = extract_university_name(request)
+                save_ranking_project(request.user, university_obj, positive_percentage, negative_percentage)
                 return render(request, 'project/overview.html', {
                     'university_name': university,
                     'positive_count': positive_count,
@@ -419,7 +417,7 @@ def comparison_view(request, university):
                 unique_months_negative = comparison_data['unique_months_negative']
                 unique_months_negative1 = comparison_data['unique_months_negative1']
 
-                success_message = 'University Selected.'
+                success_message = 'Successful.'
 
         else:
             custom_errors.append("Please select a university.")
@@ -463,11 +461,55 @@ class RankingListView(ListView):
             return redirect('index')
         return super().dispatch(request, *args, **kwargs)
 
+# remove profile picture code
+def remove_profile_pic(request):
+    if not request.user.is_authenticated:
+        return redirect('index')
+
+    user_profile = Profile.objects.get(user=request.user)
+
+    try:
+        # Remove the profile picture
+        user_profile.profile_pic.delete(save=True)
+
+        # Display a success message
+        messages.success(request, 'Profile picture deleted successfully.')
+        # messages.success(request, f'Project {project.name.name} deleted successfully.')
+        return JsonResponse({'success': True, 'message': 'Profile picture deleted successfully.'})
+    except Exception as e:
+        # Display an error message
+        messages.error(request, f'Error: {str(e)}')
+        return JsonResponse({'success': False, 'message': 'Something went wrong. Try again later.'})
+    
 def profile_view(request):
     if not request.user.is_authenticated:
-         return redirect('index')
+        return redirect('index')
+
+    # Using get_or_create to get the profile or create it if it doesn't exist
+    user_profile, created = Profile.objects.get_or_create(user=request.user)
+
+    form = UserProfileForm(instance=user_profile)
+    picture_form = ProfilePictureForm(instance=user_profile)
+
+    if request.method == 'POST':
+        if 'gender' in request.POST or 'role' in request.POST or 'description' in request.POST : 
+            # Handle the user information form
+            form = UserProfileForm(request.POST, instance=user_profile)
+            if form.is_valid():
+                form.save()
+                return redirect('university_checker:profile')
+        else:
+            picture_form = ProfilePictureForm(request.POST, request.FILES, instance=user_profile)
+            if picture_form.is_valid():
+                picture_form.save()
+                return redirect('university_checker:profile')
+        
     else:
-        return render(request, 'settings/profile.html')
+        form = UserProfileForm(instance=user_profile)
+        picture_form = ProfilePictureForm(instance=user_profile)
+
+    context = {'user_profile': user_profile, 'form': form, 'picture_form': picture_form}
+    return render(request, 'settings/profile.html', context)
 
 def change_password_view(request):
     if not request.user.is_authenticated:

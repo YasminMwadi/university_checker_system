@@ -9,7 +9,8 @@ class University(models.Model):
 
     def __str__(self):
         return self.name
-
+    
+# all tweets model
 class Tweets(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     university_name = models.ForeignKey(University, on_delete=models.CASCADE)
@@ -20,7 +21,7 @@ class Tweets(models.Model):
 
     def __str__(self):
         return f"{self.university_name} - {self.sentiment_score}"
-    
+# clearn tweet model
 class FilteredTweets(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     university_name = models.ForeignKey(University, on_delete=models.CASCADE)
@@ -31,15 +32,7 @@ class FilteredTweets(models.Model):
     def __str__(self):
         return f"Filtered Tweet by {self.user.username} at {self.created_at} for {self.university_name}"
 
-    
-class SentimentResultAnalysis(models.Model):
-    university = models.ForeignKey(University, on_delete=models.CASCADE)
-    sentiment = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Sentiment result for {self.university}: {self.sentiment}"
-    
+#ranking model   
 class ranking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.ForeignKey(University, on_delete=models.CASCADE)
@@ -49,4 +42,17 @@ class ranking(models.Model):
 
     def __str__(self):
         return f"Sentiment result for {self.name}: {self.positive}: {self.negative}"
- 
+    
+def profile_image_path(instance, filename):
+    # Use the user's ID as the filename
+    return f'profile_pics/{instance.user.username}_profile.jpg'
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    gender = models.CharField(max_length=100, blank=True)
+    role = models.CharField(max_length=100, blank=True)
+    description = models.TextField(blank=True)
+    profile_pic = models.ImageField(upload_to=profile_image_path, blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username

@@ -56,7 +56,7 @@ aria-label="Secondary"
   </button>
 </div>
 
-<!-- User avatar button -->
+<!-- User user button -->
 <div class="relative ml-auto" x-data="{ open: false }">
   <button
     @click="open = !open"
@@ -66,7 +66,7 @@ aria-label="Secondary"
     class="block transition-opacity duration-200 rounded-full dark:opacity-75 dark:hover:opacity-100 focus:outline-none focus:ring dark:focus:opacity-100"
   >
     <span class="sr-only">User menu</span>
-    <img class="w-10 h-10 rounded-full" src="{% static 'images/avatar.jpg' %}" alt="profile" />
+    <img class="w-10 h-10 rounded-full" src="{% if user_profile_pic%}{{ user_profile_pic }}{% else %}{% static 'images/user.jpg' %}{% endif %}" alt="profile" />
   </button>
 
   <!-- User dropdown menu -->

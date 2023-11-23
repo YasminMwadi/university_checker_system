@@ -9,6 +9,8 @@
       href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;700;900&display=swap"
       rel="stylesheet"
     />
+     <!-- Include Toastify CSS -->
+     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href= "{% static 'css/university.css' %}"/>
     <script src="https://cdn.jsdelivr.net/gh/alpine-collective/alpine-magic-helpers@0.5.x/dist/component.min.js"></script>
@@ -44,101 +46,55 @@
             <!-- select -->
             <div class="mt-2">
 
-              <!-- Charts -->
+              <!-- Profile -->
               <div class="grid grid-cols-1 p-4 space-y-8 lg:gap-8 lg:space-y-0 lg:grid-cols-2">
-                <!-- Bar chart card -->
                 <div class="col-span-1 bg-white rounded-md dark:bg-darker" x-data="{ isOn: false }">
                   <!-- Card header -->
                   <div class="flex items-center justify-between p-4 border-b dark:border-primary">
                     <h4 class="text-lg font-semibold text-gray-500 dark:text-light">Edit Profile</h4>
-
                   </div>
                   <!-- edit form begin -->
-                    <div class="relative p-4 h-full pb-6">
-                      <div class="relative p-4">
+                  <div class="relative p-4 h-full pb-6">
+                    <div class="relative p-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div class="md:col-span-1">
-                            <img class="w-48 rounded-md border" src="{% static 'images/avatar.jpg' %}" alt="profile" />
-                          </div>
-                          <div class="md:col-span-1">
-                            <small class="">Your photo should be in PNG or JPG(Jpeg) format</small>
-                            <input
-                              class="w-full px-4 py-2 border rounded-md dark:bg-darker dark:border-gray-700 focus:outline-none focus:ring focus:ring-primary-100 dark:focus:ring-primary-darker"
-                              type="file"
-                              name="upload"
-                              placeholder="Upload your photo"
-                              required
-                            />
-                            </br></br>
-                        
-                            <div class="flex items-center">
-                              <button
-                                type="submit"
-                                class="flex-1 px-4 py-2 font-medium text-center text-dark transition-colors duration-200 rounded-md outline-blue bg-gray-300 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-darker mr-2"
-                              >
-                                Update
-                              </button>
-                              <button
-                                type="submit"
-                                class="flex-1 px-4 py-2 font-medium text-center border text-danger-light transition-colors duration-200 rounded-md  hover:bg-gray-100 focus:outline-none focus:ring focus:ring-red-500 focus:ring-offset-1 dark:focus:ring-offset-darker ml-2"
-                              >
-                                Remove
-                              </button>
+                            <div class="md:col-span-1">
+                                <img class="w-48 rounded-md border" src="{% if user_profile.profile_pic %}{{ user_profile.profile_pic.url }}{% else %}{% static 'images/user.jpg' %}{% endif %}" alt="profile" />
                             </div>
-                          </div>
+                            <div class="md:col-span-1">
+                                <small class="">Your photo should be in PNG or JPG(Jpeg) format</small>
+                                <form method="post" enctype="multipart/form-data" action='#' class="space-y-6">
+                                  {% csrf_token %}
+                                  {{ picture_form.as_p }}
+                                  </br></br>
+                                  <div class="flex items-center">
+                                      <button type="submit" class="flex-1 px-4 py-2 font-medium text-center text-dark transition-colors duration-200 rounded-md outline-blue bg-gray-300 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-darker mr-2">
+                                          Update
+                                      </button>
+                                      <a href="#" id="modal_open"class="flex-1 px-4 py-2 font-medium text-center border text-danger-light transition-colors duration-200 rounded-md hover:bg-gray-100 focus:outline-none focus:ring focus:ring-red-500 focus:ring-offset-1 dark:focus:ring-offset-darker ml-2">
+                                          Remove
+                                      </a>
+                                  </div>
+                              </form>
+                            </div>
                         </div>
-                      </div>
-                      <form action="#" class="space-y-6">
-                        <input
-                          class="w-full px-4 py-2 border rounded-md dark:bg-darker dark:border-gray-700 focus:outline-none focus:ring focus:ring-primary-100 dark:focus:ring-primary-darker"
-                          type="text"
-                          name="name"
-                          placeholder="FullName"
-                          required
-                        />
-                        <input
-                          class="w-full px-4 py-2 border rounded-md dark:bg-darker dark:border-gray-700 focus:outline-none focus:ring focus:ring-primary-100 dark:focus:ring-primary-darker"
-                          type="email"
-                          name="email"
-                          placeholder="Email address"
-                          required
-                        />
-                        <input
-                          class="w-full px-4 py-2 border rounded-md dark:bg-darker dark:border-gray-700 focus:outline-none focus:ring focus:ring-primary-100 dark:focus:ring-primary-darker"
-                          type="text"
-                          name="gender"
-                          placeholder="Gender"
-                          required
-                        />
-                  
-                        <input
-                          class="w-full px-4 py-2 border rounded-md dark:bg-darker dark:border-gray-700 focus:outline-none focus:ring focus:ring-primary-100 dark:focus:ring-primary-darker"
-                          type="text"
-                          name="role"
-                          placeholder="Role"
-                          required
-                        />
-                        <textarea
-                          class=" resize-x w-full px-4 py-2 border rounded-md dark:bg-darker dark:border-gray-700 focus:outline-none focus:ring focus:ring-primary-100 dark:focus:ring-primary-darker"
-                          type="text"
-                          name="description"
-                          placeholder="Description"
-                          required
-                        ></textarea>
-                        <button
-                          type="submit"
-                          class="w-medium px-4 py-2 font-medium text-center text-white transition-colors
-                          duration-200 rounded-md bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 
-                          focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-darker"
-                        >
+                    </div>
+                    <form method="post" action="#" class="space-y-6">
+                      {% csrf_token %}
+                      {{ form.gender }}
+                      {{ form.role }}
+                      {{ form.description }}
+                      <button type="submit" class="w-medium px-4 py-2 font-medium text-center text-white transition-colors
+                              duration-200 rounded-md bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 
+                              focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-darker">
                           Update
-                        </button>
-                      </form>
-                    </div> 
+                      </button>
+                  </form>
+                </div>
+                
                   <!--end edit form  -->
                 </div>
 
-                <!-- Doughnut chart card -->
+                <!-- Profile details-->
                 <div class="bg-white rounded-md dark:bg-darker" x-data="{ isOn: false }">
                   <!-- Card header -->
                   <div class="flex items-center  justify-between p-4 border-b dark:border-primary">
@@ -148,7 +104,7 @@
                     <div class="relative p-4">
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-1">
-                          <img class="w-48 rounded-md border" src="{% static 'images/avatar.jpg' %}" alt="profile" />
+                          <img class="w-48 rounded-md border" src="{% if user_profile.profile_pic %}{{ user_profile.profile_pic.url }}{% else %}{% static 'images/user.jpg' %}{% endif %}" alt="profile" />
                         </div>
                         <div class="flex items-center">
                           <button
@@ -165,30 +121,61 @@
                       <div class="">
                         <ul class="list-none list-inside">
                           <li class="flex items-center text-gray-500 dark:text-light">
-                           <strong>Full Name : </strong> John Doe
+                           <strong>Full Name : </strong>  {{ user_profile.user.first_name }}
                           </li>
                           <li class="flex items-center text-gray-500 dark:text-light">
-                          <strong>Email : </strong>johndoe@example.com
+                          <strong>Email :  </strong>  {{ user_profile.user.email }}
                           </li>
                           <li class="flex items-center text-gray-500 dark:text-light">
-                          <strong>Gender : </strong> Male
+                          <strong>Gender : </strong> {{ user_profile.gender }}
                           </li>
                           <li class="flex items-center text-gray-500 dark:text-light">
-                          <strong>Role : </strong> Student
+                          <strong>Role : </strong> {{ user_profile.role }}
                           </li>
                         </ul></br>
                         <div  class=" text-gray-500 dark:text-light">
                           <h4><strong>Description</strong></h4>
-                          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                          <p>{{ user_profile.description }}</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
+                <!-- end profile details-->
               </div>
             </div>
           </main>
-          <!-- modal -->
+          <!-- modal to remove profile image-->
+          <div id="profile_modal" class="relative hidden z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+              <div class="fixed inset-0 z-10 overflow-y-auto">
+                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                  <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                      <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                          <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                          </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                          <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Remove profile picture</h3>
+                          <div class="mt-2">
+                            <p class="text-sm text-gray-500">Are you sure you want to Remove your profile picture? The profile picture will be permanently deleted. This action cannot be undone.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                      <button type="button" id="modal_ok" class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto">Delete</button>
+                      <button type="button" id="modal_cancel" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+        <!-- End modal to remove profile picture-->
+          <!-- modal to delete account-->
             <div id="modal" class="relative hidden z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
               <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                 <div class="fixed inset-0 z-10 overflow-y-auto">
@@ -217,6 +204,7 @@
                   </div>
                 </div>
             </div>
+          <!-- End modal to delete account-->
             {% include "inc/footer.html"%}
         </div>
       </div>
@@ -224,8 +212,7 @@
 
     <!-- All javascript code in this project for now is just for demo DON'T RELY ON IT  -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.bundle.min.js"></script>
-    <!-- Select2 JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <script src="{% static 'js/script.js' %}"></script>
     <script>
@@ -334,6 +321,97 @@
           }
         }
       }
+      // modal to remove profile picture
+      // Function to retrieve the CSRF token from cookies
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      }
+      let profile_modal = document.getElementById('profile_modal');
+      let profile_btn = document.getElementById('modal_open');
+        let profile_button = document.getElementById('modal_ok');
+        let profile_cancelBtn = document.getElementById('modal_cancel');
+
+        profile_btn.onclick = function () {
+          profile_modal.style.display = 'block';
+            };
+
+            profile_button.onclick = function () {
+              
+              fetch(`/university_checker/remove_profile_pic/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+              if (data.success) {
+                // Hide the modal
+                profile_modal.style.display = 'none';
+            
+                Toastify({
+                    text: "Project deleted successfully",
+                    duration: 3000,
+                    newWindow: true,
+                    close: true,
+                    gravity: "top",
+                    position: "left",
+                    stopOnFocus: true, 
+                    backgroundColor: '#118C42',
+                    onClick: function(){} // Callback after click
+                }).showToast(); 
+            
+                // Delay the page reload until after the toast has disappeared
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
+              }
+             else {
+                    Toastify({
+                      text: 'Something went wrong. Try later',
+                      duration: 3000,
+                      newWindow: true,
+                      close: true,
+                      gravity: "top", 
+                      position: "left",
+                      stopOnFocus: true,
+                      backgroundColor: '#D42A46',
+                        onClick: function(){} 
+                    }).showToast();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+            };
+            profile_cancelBtn.onclick = function () {
+              profile_modal.style.display = 'none';
+            Toastify({
+              text: "Deletion Cancelled",
+              duration: 3000,
+              newWindow: true,
+              close: true,
+              gravity: "top", 
+              position: "left",
+              stopOnFocus: true, 
+              backgroundColor: '#118C42',
+              onClick: function(){} 
+            }).showToast();
+            };
+
+      window.onclick = function (event) {
+      if (event.target == profile_modal) {
+        profile_modal.style.display = "none";
+      }
+      }
+
+      // modal to delte account
         let modal = document.getElementById('modal');
         let btn = document.getElementById('open-btn');
           let button = document.getElementById('ok-btn');
