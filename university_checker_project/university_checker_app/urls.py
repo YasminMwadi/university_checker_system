@@ -18,6 +18,7 @@ urlpatterns = [
     path('overview_report/<str:university>/', views.Overview_generatePdf.as_view(),  name='overview_report'),
     path('comparison_report/<str:university>/<str:selected_university>/', views.Comparison_generatePdf.as_view(), name='comparison_report'),  
     path('remove_profile_pic/', views.remove_profile_pic, name='remove_profile_pic'),
+    path('delete_account/', views.delete_account, name='delete_account'),
 
 ]
  

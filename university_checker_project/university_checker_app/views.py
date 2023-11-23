@@ -460,6 +460,42 @@ class RankingListView(ListView):
         if not self.request.user.is_authenticated:
             return redirect('index')
         return super().dispatch(request, *args, **kwargs)
+#  delete user account
+@login_required
+def delete_account(request):
+    # if request.method == 'POST':
+    user = request.user
+
+    try:
+        # Delete related tweets
+        Tweets.objects.filter(user=user).delete()
+
+        # Delete related filtered tweets
+        FilteredTweets.objects.filter(user=user).delete()
+
+        # Delete related rankings
+        ranking.objects.filter(user=user).delete()
+
+        # Delete user profile picture
+        if user.profile.profile_pic:
+            user.profile.profile_pic.delete()
+
+        # Delete user profile
+        user.profile.delete()
+
+        # Delete the user account
+        user.delete()
+
+        # Display a success message
+        return JsonResponse({'success': True, 'message': 'Account deleted successfully.'})
+
+    except Exception as e:
+        # Display an error message
+        print(e)
+        return JsonResponse({'error': False, 'message': f'Error: {str(e)}'})
+
+    # Handle other HTTP methods error
+    # return JsonResponse({'error': False, 'message': 'Invalid request method.'})
 
 # remove profile picture code
 def remove_profile_pic(request):
@@ -474,12 +510,11 @@ def remove_profile_pic(request):
 
         # Display a success message
         messages.success(request, 'Profile picture deleted successfully.')
-        # messages.success(request, f'Project {project.name.name} deleted successfully.')
-        return JsonResponse({'success': True, 'message': 'Profile picture deleted successfully.'})
+        return JsonResponse({'error': True, 'message': 'Profile picture deleted successfully.'})
     except Exception as e:
         # Display an error message
         messages.error(request, f'Error: {str(e)}')
-        return JsonResponse({'success': False, 'message': 'Something went wrong. Try again later.'})
+        return JsonResponse({'error': False, 'message': 'Something went wrong. Try again later.'})
     
 def profile_view(request):
     if not request.user.is_authenticated:
