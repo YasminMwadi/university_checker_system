@@ -1,7 +1,5 @@
 import matplotlib
-matplotlib.use('Agg')  # Set the Matplotlib backend to Agg (non-GUI)
-
-# Import the required libraries
+matplotlib.use('Agg')
 from university_checker_app.models import FilteredTweets
 import re
 import emoji
@@ -11,9 +9,6 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
 import os
-import threading  # Import the threading module
-
-# Rest of your code...
 
 
 os.environ['MPLBACKEND'] = 'Agg'
@@ -27,7 +22,7 @@ def generate_word_cloud(text, title):
         colormap='coolwarm'     # Colormap for color scheme
     ).generate(text)
 
-    # Create a matplotlib figure for displaying the word cloud
+    # Creating a matplotlib figure for displaying the word cloud
     plt.figure(figsize=(10, 5))
     plt.imshow(wordcloud, interpolation='bilinear')
     plt.axis("off")  # Remove axis labels
@@ -72,7 +67,7 @@ def clean_twitter_text(tweet_text):
     # Calculate sentiment
     sentiment_results = sentiment_score(tweet_text)
 
-    # You can assign the cleaned text to a variable if needed
+    #Assigning tweet_text to variable cleaned_text
     cleaned_text = tweet_text
 
     return cleaned_text, sentiment_results
@@ -97,7 +92,6 @@ def sentiment_score(tweet_text):
         sentiment_category = "Neutral"
 
     # Create a list with the sentiment results
-    # print("category"+ sentiment_category)
     sentiment_results = {
         "sentiment": sentiment_category,
     }

@@ -1,17 +1,15 @@
-# university_checker_app/context_processors/custom_context_processors.py
+
 from university_checker_app.models import Profile  # Import your Profile model
 
 def university_link(request):
     # Get the path of the request
     path_components = request.path.split('/')
 
-    # Check if the path contains "overview," "comparison," or "ranking"
+    # Check if the path contains "overview,"or "comparison
     if 'overview' in path_components:
         index = path_components.index('overview')
     elif 'comparison' in path_components:
         index = path_components.index('comparison')
-    # elif 'ranking' in path_components:
-    #     index = path_components.index('ranking')
     else:
         # If none of the keywords are found, set index to -1
         index = -1

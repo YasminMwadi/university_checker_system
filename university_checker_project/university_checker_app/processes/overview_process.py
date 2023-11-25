@@ -1,7 +1,6 @@
 from ..sentiment_analysis.university_tweet_clearning import clean_twitter_text, generate_word_cloud
 import base64
 import os
-from django.shortcuts import render, redirect, get_object_or_404
 from collections import Counter
 from django.db.models import Q 
 from ..models import FilteredTweets, ranking
@@ -10,16 +9,10 @@ from django.http import Http404
 IMAGE_DIR = os.path.join('static', 'images/wordcloud_images')
 
 # save Ranking
-
 def save_ranking_project(request_user, university_obj, positive_count, negative_count):
     try:
         # Try to get the existing ranking entry
         ranking_entry = ranking.objects.get(user=request_user, name=university_obj)
-
-        # If the entry exists, update the values
-        # ranking_entry.positive = positive_count
-        # ranking_entry.negative = negative_count
-        # ranking_entry.save()
         print(ranking_entry)
 
     except ranking.DoesNotExist:
@@ -33,7 +26,7 @@ def save_ranking_project(request_user, university_obj, positive_count, negative_
         sentiment_project.save()
 
     except Http404:
-        # Handle the 404 exception (optional, can be used for logging)
+        # Handle the 404 exception
         print(f"No ranking entry found for user {request_user} and university {university_obj}")
 
 
@@ -42,7 +35,6 @@ def save_filtered_tweet(request_user, university_obj, cleaned_text, sentiment, c
     try:
         # Try to get the existing filtered tweet entry
         existing_entry = FilteredTweets.objects.get(user=request_user, university_name=university_obj)
-        # print (existing_entry)
         # If the entry exists, update the values
         existing_entry.filtered_tweet = cleaned_text
         existing_entry.sentiment_score = sentiment.get('sentiment', None)
@@ -61,7 +53,7 @@ def save_filtered_tweet(request_user, university_obj, cleaned_text, sentiment, c
         filtered_tweet.save()
 
     except Http404:
-        # Handle the 404 exception (optional, can be used for logging)
+        # Handle the 404 exception 
         print(f"No FilteredTweets entry found for user {request_user} and university {university_obj}")
 
 #sentiment analysis and chart displays code

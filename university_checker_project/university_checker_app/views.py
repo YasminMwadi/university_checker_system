@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic  import View, TemplateView, ListView, DetailView
+from django.views.generic  import View, ListView
 from .models import University, Tweets, FilteredTweets, ranking, Profile
-from .forms import RegistrationForm, CustomPasswordResetForm, UploadFileForm, UserProfileForm, ProfilePictureForm
+from .forms import RegistrationForm, CustomPasswordResetForm, UploadFileForm, UserProfileForm, ProfilePictureForm, ChangePasswordForm
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -11,15 +11,30 @@ from django.contrib.auth.views import PasswordResetView
 import pandas as pd
 from .sentiment_analysis.university_tweet_fetching import project_sentiment_analysis
 import os
-import matplotlib.pyplot as plt
 from .processes.process import html_to_pdf 
-from .processes.comparison_process import compare_tweets, get_comparison_data
+from .processes.comparison_process import get_comparison_data
 from .processes.overview_process import process_tweets, generate_wordcloud_images, calculate_sentiment_counts, save_ranking_project
+from django.http import Http404
+from django.conf import settings
+import mimetypes
 
 IMAGE_DIR = os.path.join('static', 'images/wordcloud_images')   
 
-# delete project code
+# Download user manuel
+def download_manual(request):
+    file_path = os.path.join(settings.STATICFILES_DIRS[0], 'doc', 'user_manual.pdf')
+    
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as manual_file:
+            content_type, encoding = mimetypes.guess_type(file_path)
+            content_type = content_type or 'application/octet-stream'
 
+            response = HttpResponse(manual_file.read(), content_type=content_type)
+            response['Content-Disposition'] = 'inline; filename="user_manual.pdf"'
+            return response
+    else:
+        raise Http404
+# delete project code
 def delete_project(request, project_id):
     project = get_object_or_404(ranking, id=project_id)
 
@@ -545,13 +560,30 @@ def profile_view(request):
 
     context = {'user_profile': user_profile, 'form': form, 'picture_form': picture_form}
     return render(request, 'settings/profile.html', context)
-
+# change password view
 def change_password_view(request):
     if not request.user.is_authenticated:
-         return redirect('index')
-    else:
-        return render(request, 'settings/change_password.html')
+        return redirect('index')
+    
+    form = ChangePasswordForm(request.user)  
 
+    if request.method == 'POST':
+        form = ChangePasswordForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            logout(request)
+            # Display a success message
+            messages.success(request, 'Your password was successfully updated!')
+            # Redirect to the desired page
+            return JsonResponse({'success': True, 'message': 'Password updated successfully'})
+        else:
+            # Display form errors
+            error_messages = [message for field, message in form.errors.items()]
+            return JsonResponse({'error': True, 'messages': error_messages})
+
+    # Handle other HTTP methods error
+    return render(request, 'settings/change_password.html', {'form': form})
+    
 def user_management_view(request):
     if not request.user.is_authenticated:
          return redirect('index')

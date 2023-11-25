@@ -1,5 +1,7 @@
 from django.urls import path
 from university_checker_app import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 app_name = 'university_checker'
 urlpatterns = [
@@ -19,6 +21,6 @@ urlpatterns = [
     path('comparison_report/<str:university>/<str:selected_university>/', views.Comparison_generatePdf.as_view(), name='comparison_report'),  
     path('remove_profile_pic/', views.remove_profile_pic, name='remove_profile_pic'),
     path('delete_account/', views.delete_account, name='delete_account'),
+     path('download_manual/', views.download_manual, name='download_manual'),
 
-]
- 
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

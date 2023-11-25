@@ -52,9 +52,12 @@
                 <!-- Line chart card -->
                 <div class="col-span-2 bg-white rounded-md dark:bg-darker" x-data="{ isOn: false }">
                   <!-- Card header -->
+                 
                   <div class="flex items-center justify-between p-4 border-b dark:border-primary">
                     <h4 class="text-lg font-semibold text-gray-500 dark:text-light">University Ranges</h4>
-                    <p>Create more project to see their ranking amoung public university in south africa </p>
+
+                    {% if rankings%} <p>Create more project to see their ranking amoung public university in south africa </p>{%endif%}
+                    
                   </div>
                   {% if rankings%}
                   <!-- data table -->
@@ -90,7 +93,17 @@
                 </div>
                 
                   {%else%}
-                  <p>Create more project to see thier ranking amoung public university in south africa </p>
+                    <div style="margin-top:10%; margin-bottom:20%; text-align:center;">
+                      <h1 class="text-xl font-semibold">No ranking available. </h1>
+                      <h3>Create projects to see their ranking amoung public university in south africa. </h3>
+                      <br>
+                      <a
+                      href="{% url 'university_checker:new_project' %}"
+                      class="px-4 py-2 text-sm text-white rounded-md bg-primary hover:bg-primary-dark focus:outline-none focus:ring focus:ring-primary focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-dark"
+                    >
+                     + Add a new project
+                    </a>
+                    </div>
                   {%endif%}
                 </div>
               </div>
